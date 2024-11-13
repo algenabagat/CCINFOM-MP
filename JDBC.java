@@ -3,7 +3,7 @@ import java.sql.*;
 public class JDBC {
     public static void main(String[] args) throws SQLException {
 
-        String sql = "Select"; //
+        String sql = "Select"; // Query Statement
 
         String url = "jdbc:mysql:";
         String username = "mysql";
