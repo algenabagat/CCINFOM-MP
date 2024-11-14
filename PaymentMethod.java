@@ -1,27 +1,27 @@
 public class PaymentMethod {
-    private int paymentMethodId;
-    private String methodName;
+    private int paymentMethod_id;
+    private String method_name;
 
     // Constructor
-    public PaymentMethod(int paymentMethodId, String methodName) {
-        this.paymentMethodId = paymentMethodId;
-        this.methodName = methodName;
+    public PaymentMethod(int paymentMethod_id, String method_name) {
+        this.paymentMethod_id = paymentMethod_id;
+        this.method_name = method_name;
     }
 
     // Getters and Setters
-    public int getPaymentMethodId() {
-        return paymentMethodId;
+    public int getpaymentMethod_id() {
+        return paymentMethod_id;
     }
 
-    public void setPaymentMethodId(int paymentMethodId) {
-        this.paymentMethodId = paymentMethodId;
+    public void setpaymentMethod_id(int paymentMethod_id) {
+        this.paymentMethod_id = paymentMethod_id;
     }
 
-    public String getMethodName() {
-        return methodName;
+    public String getmethod_name() {
+        return method_name;
     }
 
-    public void setMethodName(String methodName) {
-        this.methodName = methodName;
+    public void setmethod_name(String method_name) {
+        this.method_name = method_name;
     }
 }

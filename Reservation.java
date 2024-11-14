@@ -1,28 +1,28 @@
 import java.util.Date;
 
 public class Reservation {
-    private int reservationId;
+    private int reservation_id;
     private Guest guest;
-    private Date checkinDate;
-    private Date checkoutDate;
+    private Date checkIn_date;
+    private Date checkOut_date;
     private Hotel hotel;
 
     // Constructor
-    public Reservation(int reservationId, Guest guest, Date checkinDate, Date checkoutDate, Hotel hotel) {
-        this.reservationId = reservationId;
+    public Reservation(int reservation_id, Guest guest, Date checkIn_date, Date checkOut_date, Hotel hotel) {
+        this.reservation_id = reservation_id;
         this.guest = guest;
-        this.checkinDate = checkinDate;
-        this.checkoutDate = checkoutDate;
+        this.checkIn_date = checkIn_date;
+        this.checkOut_date = checkOut_date;
         this.hotel = hotel;
     }
 
     // Getters and Setters
-    public int getReservationId() {
-        return reservationId;
+    public int getreservation_id() {
+        return reservation_id;
     }
 
-    public void setReservationId(int reservationId) {
-        this.reservationId = reservationId;
+    public void setreservation_id(int reservation_id) {
+        this.reservation_id = reservation_id;
     }
 
     public Guest getGuest() {
@@ -33,20 +33,20 @@ public class Reservation {
         this.guest = guest;
     }
 
-    public Date getCheckinDate() {
-        return checkinDate;
+    public Date getcheckIn_date() {
+        return checkIn_date;
     }
 
-    public void setCheckinDate(Date checkinDate) {
-        this.checkinDate = checkinDate;
+    public void setcheckIn_date(Date checkIn_date) {
+        this.checkIn_date = checkIn_date;
     }
 
-    public Date getCheckoutDate() {
-        return checkoutDate;
+    public Date getcheckOut_date() {
+        return checkOut_date;
     }
 
-    public void setCheckoutDate(Date checkoutDate) {
-        this.checkoutDate = checkoutDate;
+    public void setcheckOut_date(Date checkOut_date) {
+        this.checkOut_date = checkOut_date;
     }
 
     public Hotel getHotel() {

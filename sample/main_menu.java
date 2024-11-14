@@ -1,4 +1,4 @@
-package G204DBAPP;
+package sample;
 
 import java.util.Scanner;
 
