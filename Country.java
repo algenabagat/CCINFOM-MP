@@ -11,6 +11,10 @@ public class Country {
         return country_id;
     }
 
+    public String getCountryName(){
+        return country_name;
+    }
+
     public String countryName(){
         return country_name;
     }
