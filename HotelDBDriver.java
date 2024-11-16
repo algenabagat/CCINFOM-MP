@@ -4,16 +4,16 @@ public class HotelDBDriver {
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-
         // Call login method before proceeding to main menu
         if (!DatabaseConnection.login()) {
             System.out.println("Login failed. Exiting the system.");
+            scanner.close(); // Close the scanner before exiting
             return; // Exit the program if login fails
         }
 
         // Instantiate management classes after successful login
         HotelManagementView hotelManagement = new HotelManagementView(scanner);
-        EmployeeManagement employeeManagement = new EmployeeManagement(scanner);
+        EmployeeManagementView employeeManagement = new EmployeeManagementView(scanner);
         ReservationManagement reservationManagement = new ReservationManagement(scanner);
         PaymentManagement paymentManagement = new PaymentManagement(scanner);
 
