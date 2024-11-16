@@ -1,3 +1,5 @@
+package classes;
+
 public class Discount {
     private int discountID;
     private String discountName;

@@ -1,3 +1,5 @@
+package classes;
+
 public class Room {
     private int roomId;
     private int roomNo;

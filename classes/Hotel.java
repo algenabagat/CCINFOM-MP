@@ -1,3 +1,5 @@
+package classes;
+
 public class Hotel {
     private int hotelId;
     private String hotelName;

@@ -1,3 +1,5 @@
+package classes;
+
 public class Roomtype {
     private int roomTypeId;
     private String type;

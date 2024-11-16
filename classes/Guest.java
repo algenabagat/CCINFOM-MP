@@ -1,3 +1,5 @@
+package classes;
+
 public class Guest {
     private int guestId;
     private String guestName;

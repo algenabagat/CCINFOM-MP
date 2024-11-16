@@ -1,3 +1,5 @@
+package classes;
+
 public class Location {
     private int locationId;
     private String streetAddress;

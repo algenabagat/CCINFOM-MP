@@ -1,3 +1,5 @@
+package classes;
+
 public class Country {
     private int countryID;
     private String countryName;
