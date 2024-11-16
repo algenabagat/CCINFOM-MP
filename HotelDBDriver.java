@@ -33,25 +33,16 @@ public class HotelDBDriver {
             scanner.nextLine(); // This consumes the remaining newline character after nextInt()
 
             switch (choice) {
-                case 1:
-                    hotelManagement.showMenu();
-                    break;
-                case 2:
-                    employeeManagement.showMenu();
-                    break;
-                case 3:
-                    reservationManagement.showMenu();
-                    break;
-                case 4:
-                    paymentManagement.showMenu();
-                    break;
-                case 0:
+                case 1 -> hotelManagement.showMenu();
+                case 2 -> employeeManagement.showMenu();
+                case 3 -> reservationManagement.showMenu();
+                case 4 -> paymentManagement.showMenu();
+                case 0 -> {
                     System.out.println("Exiting the system. Goodbye!");
                     scanner.close();
                     System.exit(0);
-                    break;
-                default:
-                    System.out.println("Invalid choice. Please try again.");
+                }
+                default -> System.out.println("Invalid choice. Please try again.");
             }
         }
     }
