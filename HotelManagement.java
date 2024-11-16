@@ -1,49 +1,55 @@
-import java.sql.*;
+import java.util.Scanner;
 
 public class HotelManagement {
-    public static void viewHotelDetails() {
-        String query = "SELECT " +
-                "h.HOTEL_ID, h.HOTEL_NAME, " +
-                "l.STREET_ADDRESS, l.CITY, l.POSTAL_CODE, l.STATE_PROVINCE, " +
-                "c.COUNTRY_NAME, h.HOTEL_EMAIL, h.CONTACT_NO " +
-                "FROM hotel h " +
-                "JOIN location l ON h.LOCATION_ID = l.LOCATION_ID " +
-                "JOIN country c ON l.COUNTRY_ID = c.COUNTRY_ID";
+    private final Scanner scanner;
 
-        try (Connection con = DatabaseConnection.getConnection();
-             Statement stmt = con.createStatement();
-             ResultSet rs = stmt.executeQuery(query)) {
+    public HotelManagement(Scanner scanner) {
+        this.scanner = scanner;
+    }
 
-            // Print the table header with partitions
-            System.out.println("+------------+--------------------------------+------------------------------------------+----------------------+--------------+--------------------------+---------------------+----------------------------------------------------+-----------------+");
-            System.out.printf("| %-10s | %-30s | %-40s | %-20s | %-12s | %-24s | %-19s | %-50s | %-15s |\n",
-                    "Hotel ID", "Hotel Name", "Street Address", "City", "Postal Code",
-                    "State/Province", "Country", "Hotel Email", "Contact No");
-            System.out.println("+------------+--------------------------------+------------------------------------------+----------------------+--------------+--------------------------+---------------------+----------------------------------------------------+-----------------+");
+    public void showMenu() {
+        while (true) {
+            System.out.println("\nHotel Management Menu:");
+            System.out.println("1. View Hotel Details");
+            System.out.println("2. Update Hotel Details");
+            System.out.println("3. Create a New Room");
+            System.out.println("4. Update Room Details");
+            System.out.println("5. Delete a Room");
+            System.out.println("0. Return to Main Menu");
 
-            // Loop through the result set and print each hotel record in tabular format with partitions
-            while (rs.next()) {
-                int hotelId = rs.getInt("HOTEL_ID");
-                String hotelName = rs.getString("HOTEL_NAME");
-                String streetAddress = rs.getString("STREET_ADDRESS");
-                String city = rs.getString("CITY");
-                String postalCode = rs.getString("POSTAL_CODE");
-                String stateProvince = rs.getString("STATE_PROVINCE");
-                String countryName = rs.getString("COUNTRY_NAME");
-                String hotelEmail = rs.getString("HOTEL_EMAIL");
-                String contactNo = rs.getString("CONTACT_NO");
+            System.out.print("Choose an option: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
 
-                // Print the hotel details with partitions and proper borders
-                System.out.printf("| %-10d | %-30s | %-40s | %-20s | %-12s | %-24s | %-19s | %-50s | %-15s |\n",
-                        hotelId, hotelName, streetAddress, city, postalCode,
-                        stateProvince, countryName, hotelEmail, contactNo);
-                System.out.println("+------------+--------------------------------+------------------------------------------+----------------------+--------------+--------------------------+---------------------+----------------------------------------------------+-----------------+");
+            switch (choice) {
+                case 1 -> viewHotelDetails();
+                case 2 -> updateHotelDetails();
+                case 3 -> createRoom();
+                case 4 -> updateRoomDetails();
+                case 5 -> deleteRoom();
+                case 0 -> { return; }
+                default -> System.out.println("Invalid choice. Please try again.");
             }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
     }
 
+    private void viewHotelDetails() {
+        System.out.println("Viewing hotel details...");
+    }
 
+    private void updateHotelDetails() {
+        System.out.println("Updating hotel details...");
+    }
+
+    private void createRoom() {
+        System.out.println("Creating a new room...");
+    }
+
+    private void updateRoomDetails() {
+        System.out.println("Updating room details...");
+    }
+
+    private void deleteRoom() {
+        System.out.println("Deleting a room...");
+    }
 }
