@@ -1,37 +1,37 @@
 public class Discount {
-    private int discount_id;
-    private String discount_name;
-    private float discount_percentage;
+    private int discountID;
+    private String discountName;
+    private float discountPercentage;
 
     // Constructor
-    public Discount(int discount_id, String discount_name, float discount_percentage) {
-        this.discount_id = discount_id;
-        this.discount_name = discount_name;
-        this.discount_percentage = discount_percentage;
+    public Discount(int discountID, String discountName, float discountPercentage) {
+        this.discountID = discountID;
+        this.discountName = discountName;
+        this.discountPercentage = discountPercentage;
     }
 
     // Getters and Setters
-    public int getdiscount_id() {
-        return discount_id;
+    public int getDiscountID() {
+        return discountID;
     }
 
-    public void setdiscount_id(int discount_id) {
-        this.discount_id = discount_id;
+    public void setDiscountID(int discountID) {
+        this.discountID = discountID;
     }
 
-    public String getdiscount_name() {
-        return discount_name;
+    public String getDiscountName() {
+        return discountName;
     }
 
-    public void setdiscount_name(String discount_name) {
-        this.discount_name = discount_name;
+    public void setDiscountName(String discountName) {
+        this.discountName = discountName;
     }
 
-    public float getdiscount_percentage() {
-        return discount_percentage;
+    public float getDiscountPercentage() {
+        return discountPercentage;
     }
 
-    public void setdiscount_percentage(float discount_percentage) {
-        this.discount_percentage = discount_percentage;
+    public void setDiscountPercentage(float discountPercentage) {
+        this.discountPercentage = discountPercentage;
     }
 }

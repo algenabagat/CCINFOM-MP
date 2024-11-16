@@ -1,59 +1,69 @@
-import java.util.Date;
+import java.time.LocalDate;
 
 public class Reservation {
-    private int reservation_id;
-    private Guest guest;
-    private Date checkIn_date;
-    private Date checkOut_date;
-    private Hotel hotel;
+    private int reservationId;
+    private int guestId;
+    private LocalDate checkInDate;
+    private LocalDate checkOutDate;
+    private int hotelId;
+    private int paymentId;
 
     // Constructor
-    public Reservation(int reservation_id, Guest guest, Date checkIn_date, Date checkOut_date, Hotel hotel) {
-        this.reservation_id = reservation_id;
-        this.guest = guest;
-        this.checkIn_date = checkIn_date;
-        this.checkOut_date = checkOut_date;
-        this.hotel = hotel;
+    public Reservation(int reservationId, int guestId, LocalDate checkInDate, LocalDate checkOutDate, int hotelId, int paymentId) {
+        this.reservationId = reservationId;
+        this.guestId = guestId;
+        this.checkInDate = checkInDate;
+        this.checkOutDate = checkOutDate;
+        this.hotelId = hotelId;
+        this.paymentId = paymentId;
     }
 
     // Getters and Setters
-    public int getreservation_id() {
-        return reservation_id;
+    public int getReservationId() {
+        return reservationId;
     }
 
-    public void setreservation_id(int reservation_id) {
-        this.reservation_id = reservation_id;
+    public void setReservationId(int reservationId) {
+        this.reservationId = reservationId;
     }
 
-    public Guest getGuest() {
-        return guest;
+    public int getGuestId() {
+        return guestId;
     }
 
-    public void setGuest(Guest guest) {
-        this.guest = guest;
+    public void setGuestId(int guestId) {
+        this.guestId = guestId;
     }
 
-    public Date getcheckIn_date() {
-        return checkIn_date;
+    public LocalDate getCheckInDate() {
+        return checkInDate;
     }
 
-    public void setcheckIn_date(Date checkIn_date) {
-        this.checkIn_date = checkIn_date;
+    public void setCheckInDate(LocalDate checkInDate) {
+        this.checkInDate = checkInDate;
     }
 
-    public Date getcheckOut_date() {
-        return checkOut_date;
+    public LocalDate getCheckOutDate() {
+        return checkOutDate;
     }
 
-    public void setcheckOut_date(Date checkOut_date) {
-        this.checkOut_date = checkOut_date;
+    public void setCheckOutDate(LocalDate checkOutDate) {
+        this.checkOutDate = checkOutDate;
     }
 
-    public Hotel getHotel() {
-        return hotel;
+    public int getHotelId() {
+        return hotelId;
     }
 
-    public void setHotel(Hotel hotel) {
-        this.hotel = hotel;
+    public void setHotelId(int hotelId) {
+        this.hotelId = hotelId;
+    }
+
+    public int getPaymentId() {
+        return paymentId;
+    }
+
+    public void setPaymentId(int paymentId) {
+        this.paymentId = paymentId;
     }
 }

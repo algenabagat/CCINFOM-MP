@@ -1,44 +1,44 @@
-import java.util.Date;
+import java.time.LocalDate;
 
 public class Employee {
-    private int employee_id;
-    private String employee_name;
+    private int employeeID;
+    private String employeeName;
     private String email;
-    private int contact_no;
-    private Job job;
-    private Hotel hotel;
+    private int contactNo;
+    private int jobID;
+    private int hotelID;
     private float salary;
-    private Date hire_date;
-    private Date end_date;
+    private LocalDate hireDate;
+    private LocalDate endDate;
 
     // Constructor
-    public Employee(int employee_id, String employee_name, String email, int contact_no, Job job, Hotel hotel, float salary, Date hire_date, Date end_date) {
-        this.employee_id = employee_id;
-        this.employee_name = employee_name;
+    public Employee(int employeeID, String employeeName, String email, int contactNo, int jobID, int hotelID, float salary, LocalDate hireDate, LocalDate endDate) {
+        this.employeeID = employeeID;
+        this.employeeName = employeeName;
         this.email = email;
-        this.contact_no = contact_no;
-        this.job = job;
-        this.hotel = hotel;
+        this.contactNo = contactNo;
+        this.jobID = jobID;
+        this.hotelID = hotelID;
         this.salary = salary;
-        this.hire_date = hire_date;
-        this.end_date = end_date;
+        this.hireDate = hireDate;
+        this.endDate = endDate;
     }
 
     // Getters and Setters
-    public int getemployee_id() {
-        return employee_id;
+    public int getEmployeeID() {
+        return employeeID;
     }
 
-    public void setemployee_id(int employee_id) {
-        this.employee_id = employee_id;
+    public void setEmployeeID(int employeeID) {
+        this.employeeID = employeeID;
     }
 
-    public String getemployee_name() {
-        return employee_name;
+    public String getEmployeeName() {
+        return employeeName;
     }
 
-    public void setemployee_name(String employee_name) {
-        this.employee_name = employee_name;
+    public void setEmployeeName(String employeeName) {
+        this.employeeName = employeeName;
     }
 
     public String getEmail() {
@@ -49,28 +49,28 @@ public class Employee {
         this.email = email;
     }
 
-    public int getcontact_no() {
-        return contact_no;
+    public int getContactNo() {
+        return contactNo;
     }
 
-    public void setcontact_no(int contact_no) {
-        this.contact_no = contact_no;
+    public void setContactNo(int contactNo) {
+        this.contactNo = contactNo;
     }
 
-    public Job getJob() {
-        return job;
+    public int getJobID() {
+        return jobID;
     }
 
-    public void setJob(Job job) {
-        this.job = job;
+    public void setJobID(int jobID) {
+        this.jobID = jobID;
     }
 
-    public Hotel getHotel() {
-        return hotel;
+    public int getHotelID() {
+        return hotelID;
     }
 
-    public void setHotel(Hotel hotel) {
-        this.hotel = hotel;
+    public void setHotelID(int hotelID) {
+        this.hotelID = hotelID;
     }
 
     public float getSalary() {
@@ -81,19 +81,19 @@ public class Employee {
         this.salary = salary;
     }
 
-    public Date gethire_date() {
-        return hire_date;
+    public LocalDate getHireDate() {
+        return hireDate;
     }
 
-    public void sethire_date(Date hire_date) {
-        this.hire_date = hire_date;
+    public void setHireDate(LocalDate hireDate) {
+        this.hireDate = hireDate;
     }
 
-    public Date getend_date() {
-        return end_date;
+    public LocalDate getEndDate() {
+        return endDate;
     }
 
-    public void setend_date(Date end_date) {
-        this.end_date = end_date;
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
     }
 }

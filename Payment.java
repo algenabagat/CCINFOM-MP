@@ -1,38 +1,38 @@
-import java.util.Date;
+import java.time.LocalDate;
 
 public class Payment {
-    private int payment_id;
-    private Date payment_date;
+    private int paymentId;
+    private int reservationId; // Foreign Key to reservation
+    private LocalDate paymentDate;
     private float amount;
-    private PaymentMethod payment_method;
-    private Discount discount;
-    private Reservation reservation;
+    private int discountId; // Foreign Key to discount
+    private int paymentMethodId; // Foreign Key to payment method
 
     // Constructor
-    public Payment(int payment_id, Date payment_date, float amount, PaymentMethod payment_method, Discount discount, Reservation reservation) {
-        this.payment_id = payment_id;
-        this.payment_date = payment_date;
+    public Payment(int paymentId, LocalDate paymentDate, float amount, int paymentMethodId, int discountId, int reservationId) {
+        this.paymentId = paymentId;
+        this.paymentDate = paymentDate;
         this.amount = amount;
-        this.payment_method = payment_method;
-        this.discount = discount;
-        this.reservation = reservation;
+        this.paymentMethodId = paymentMethodId;
+        this.discountId = discountId;
+        this.reservationId = reservationId;
     }
 
     // Getters and Setters
-    public int getpayment_id() {
-        return payment_id;
+    public int getPaymentId() {
+        return paymentId;
     }
 
-    public void setpayment_id(int payment_id) {
-        this.payment_id = payment_id;
+    public void setPaymentId(int paymentId) {
+        this.paymentId = paymentId;
     }
 
-    public Date getpayment_date() {
-        return payment_date;
+    public LocalDate getPaymentDate() {
+        return paymentDate;
     }
 
-    public void setpayment_date(Date payment_date) {
-        this.payment_date = payment_date;
+    public void setPaymentDate(LocalDate paymentDate) {
+        this.paymentDate = paymentDate;
     }
 
     public float getAmount() {
@@ -43,27 +43,27 @@ public class Payment {
         this.amount = amount;
     }
 
-    public PaymentMethod getPaymentMethod() {
-        return payment_method;
+    public int getPaymentMethodId() {
+        return paymentMethodId;
     }
 
-    public void setPaymentMethod(PaymentMethod payment_method) {
-        this.payment_method = payment_method;
+    public void setPaymentMethodId(int paymentMethodId) {
+        this.paymentMethodId = paymentMethodId;
     }
 
-    public Discount getDiscount() {
-        return discount;
+    public int getDiscountId() {
+        return discountId;
     }
 
-    public void setDiscount(Discount discount) {
-        this.discount = discount;
+    public void setDiscountId(int discountId) {
+        this.discountId = discountId;
     }
 
-    public Reservation getReservation() {
-        return reservation;
+    public int getReservationId() {
+        return reservationId;
     }
 
-    public void setReservation(Reservation reservation) {
-        this.reservation = reservation;
+    public void setReservationId(int reservationId) {
+        this.reservationId = reservationId;
     }
 }

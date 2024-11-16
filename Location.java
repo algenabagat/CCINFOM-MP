@@ -4,16 +4,16 @@ public class Location {
     private String city;
     private int postalCode;
     private String stateProvince;
-    private Country country;
+    private int countryId;
 
     // Constructor
-    public Location(int locationId, String streetAddress, String city, int postalCode, String stateProvince, Country country) {
+    public Location(int locationId, String streetAddress, String city, int postalCode, String stateProvince, int countryId) {
         this.locationId = locationId;
         this.streetAddress = streetAddress;
         this.city = city;
         this.postalCode = postalCode;
         this.stateProvince = stateProvince;
-        this.country = country;
+        this.countryId = countryId;
     }
 
     // Getters and Setters
@@ -57,11 +57,11 @@ public class Location {
         this.stateProvince = stateProvince;
     }
 
-    public Country getCountry() {
-        return country;
+    public int getcountryId() {
+        return countryId;
     }
 
-    public void setCountry(Country country) {
-        this.country = country;
+    public void setcountryId(int countryId) {
+        this.countryId = countryId;
     }
 }

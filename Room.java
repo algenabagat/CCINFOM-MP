@@ -1,67 +1,67 @@
 public class Room {
-    private int room_id;
-    private int room_no;
-    private Roomtype roomtype;
-    private float room_price;
-    private String room_availability;
-    private Hotel hotel;
+    private int roomId;
+    private int roomNo;
+    private int roomTypeId;
+    private float roomPrice;
+    private String roomAvailability;
+    private int hotelId;
 
     // Constructor
-    public Room(int room_id, int room_no, Roomtype roomtype, float room_price, String room_availability, Hotel hotel) {
-        this.room_id = room_id;
-        this.room_no = room_no;
-        this.roomtype = roomtype;
-        this.room_price = room_price;
-        this.room_availability = room_availability;
-        this.hotel = hotel;
+    public Room(int roomId, int roomNo, int roomTypeId, float roomPrice, String roomAvailability, int hotelId) {
+        this.roomId = roomId;
+        this.roomNo = roomNo;
+        this.roomTypeId = roomTypeId;
+        this.roomPrice = roomPrice;
+        this.roomAvailability = roomAvailability;
+        this.hotelId = hotelId;
     }
 
     // Getters and Setters
     public int getRoomId() {
-        return room_id;
+        return roomId;
     }
 
-    public void setRoomId(int room_id) {
-        this.room_id = room_id;
+    public void setRoomId(int roomId) {
+        this.roomId = roomId;
     }
 
     public int getRoomNo() {
-        return room_no;
+        return roomNo;
     }
 
-    public void setRoomNo(int room_no) {
-        this.room_no = room_no;
+    public void setRoomNo(int roomNo) {
+        this.roomNo = roomNo;
     }
 
-    public Roomtype getRoomtype() {
-        return roomtype;
+    public int getRoomTypeId() {
+        return roomTypeId;
     }
 
-    public void setRoomtype(Roomtype roomtype) {
-        this.roomtype = roomtype;
+    public void setRoomTypeId(int roomTypeId) {
+        this.roomTypeId = roomTypeId;
     }
 
     public float getRoomPrice() {
-        return room_price;
+        return roomPrice;
     }
 
-    public void setRoomPrice(float room_price) {
-        this.room_price = room_price;
+    public void setRoomPrice(float roomPrice) {
+        this.roomPrice = roomPrice;
     }
 
     public String getRoomAvailability() {
-        return room_availability;
+        return roomAvailability;
     }
 
-    public void setRoomAvailability(String room_availability) {
-        this.room_availability = room_availability;
+    public void setRoomAvailability(String roomAvailability) {
+        this.roomAvailability = roomAvailability;
     }
 
-    public Hotel getHotel() {
-        return hotel;
+    public int getHotelId() {
+        return hotelId;
     }
 
-    public void setHotel(Hotel hotel) {
-        this.hotel = hotel;
+    public void setHotelId(int hotelId) {
+        this.hotelId = hotelId;
     }
 }

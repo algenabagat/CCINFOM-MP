@@ -1,44 +1,44 @@
 public class Guest {
-    private int guest_id;
-    private String guest_name;
-    private int contact_no;
+    private int guestId;
+    private String guestName;
+    private int contactNo;
     private String email;
 
     public Guest(int guestId, String guestName, int contactNo) {
-        this.guest_id = guestId;
-        this.guest_name = guestName;
-        this.contact_no = contactNo;
+        this.guestId = guestId;
+        this.guestName = guestName;
+        this.contactNo = contactNo;
     }
 
     public Guest(int guestId, String guestName, int contactNo, String email) {
-        this.guest_id = guestId;
-        this.guest_name = guestName;
-        this.contact_no = contactNo;
+        this.guestId = guestId;
+        this.guestName = guestName;
+        this.contactNo = contactNo;
         this.email = email;
     }
 
     public int getGuestId() {
-        return guest_id;
+        return guestId;
     }
 
     public void setGuestId(int guestId) {
-        this.guest_id = guestId;
+        this.guestId = guestId;
     }
 
     public String getGuestName() {
-        return guest_name;
+        return guestName;
     }
 
     public void setGuestName(String guestName) {
-        this.guest_name = guestName;
+        this.guestName = guestName;
     }
 
     public int getContactNo() {
-        return contact_no;
+        return contactNo;
     }
 
     public void setContactNo(int contactNo) {
-        this.contact_no = contactNo;
+        this.contactNo = contactNo;
     }
 
     public String getEmail() {

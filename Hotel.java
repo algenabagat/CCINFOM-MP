@@ -1,57 +1,57 @@
 public class Hotel {
-    private int hotel_id;
-    private String hotel_name;
-    private String hotel_email;
-    private int contact_no;
-    private Location location;
+    private int hotelId;
+    private String hotelName;
+    private String hotelEmail;
+    private int contactNo;
+    private int locationId;
 
     // Constructor
-    public Hotel(int hotel_id, String hotel_name, String hotel_email, int contact_no, Location location) {
-        this.hotel_id = hotel_id;
-        this.hotel_name = hotel_name;
-        this.hotel_email = hotel_email;
-        this.contact_no = contact_no;
-        this.location = location;
+    public Hotel(int hotelId, String hotelName, String hotelEmail, int contactNo, int locationId) {
+        this.hotelId = hotelId;
+        this.hotelName = hotelName;
+        this.hotelEmail = hotelEmail;
+        this.contactNo = contactNo;
+        this.locationId = locationId;
     }
 
     // Getters and Setters
-    public int gethotel_id() {
-        return hotel_id;
+    public int gethotelId() {
+        return hotelId;
     }
 
-    public void sethotel_id(int hotel_id) {
-        this.hotel_id = hotel_id;
+    public void sethotelId(int hotelId) {
+        this.hotelId = hotelId;
     }
 
-    public String gethotel_name() {
-        return hotel_name;
+    public String gethotelName() {
+        return hotelName;
     }
 
-    public void sethotel_name(String hotel_name) {
-        this.hotel_name = hotel_name;
+    public void sethotelName(String hotelName) {
+        this.hotelName = hotelName;
     }
 
-    public String gethotel_email() {
-        return hotel_email;
+    public String gethotelEmail() {
+        return hotelEmail;
     }
 
-    public void sethotel_email(String hotel_email) {
-        this.hotel_email = hotel_email;
+    public void sethotelEmail(String hotelEmail) {
+        this.hotelEmail = hotelEmail;
     }
 
-    public int getcontact_no() {
-        return contact_no;
+    public int getcontactNo() {
+        return contactNo;
     }
 
-    public void setcontact_no(int contact_no) {
-        this.contact_no = contact_no;
+    public void setcontactNo(int contactNo) {
+        this.contactNo = contactNo;
     }
 
-    public Location getLocation() {
-        return location;
+    public int getlocationId() {
+        return locationId;
     }
 
-    public void setLocation(Location location) {
-        this.location = location;
+    public void setlocationId(int locationId) {
+        this.locationId = locationId;
     }
 }
