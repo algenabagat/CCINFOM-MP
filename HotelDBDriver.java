@@ -14,8 +14,8 @@ public class HotelDBDriver {
         // Instantiate management classes after successful login
         HotelManagementView hotelManagement = new HotelManagementView(scanner);
         EmployeeManagementView employeeManagement = new EmployeeManagementView(scanner);
-        ReservationManagement reservationManagement = new ReservationManagement(scanner);
-        PaymentManagement paymentManagement = new PaymentManagement(scanner);
+        ReservationManagementView reservationManagement = new ReservationManagementView(scanner);
+        PaymentManagementView paymentManagement = new PaymentManagementView(scanner);
 
         // Main menu loop
         System.out.println("Welcome to the Hotel Management !");
