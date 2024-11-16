@@ -15,43 +15,43 @@ public class Hotel {
     }
 
     // Getters and Setters
-    public int gethotelId() {
+    public int getHotelId() {
         return hotelId;
     }
 
-    public void sethotelId(int hotelId) {
+    public void setHotelId(int hotelId) {
         this.hotelId = hotelId;
     }
 
-    public String gethotelName() {
+    public String getHotelName() {
         return hotelName;
     }
 
-    public void sethotelName(String hotelName) {
+    public void setHotelName(String hotelName) {
         this.hotelName = hotelName;
     }
 
-    public String gethotelEmail() {
+    public String getHotelEmail() {
         return hotelEmail;
     }
 
-    public void sethotelEmail(String hotelEmail) {
+    public void setHotelEmail(String hotelEmail) {
         this.hotelEmail = hotelEmail;
     }
 
-    public int getcontactNo() {
+    public int getContactNo() {
         return contactNo;
     }
 
-    public void setcontactNo(int contactNo) {
+    public void setContactNo(int contactNo) {
         this.contactNo = contactNo;
     }
 
-    public int getlocationId() {
+    public int getLocationId() {
         return locationId;
     }
 
-    public void setlocationId(int locationId) {
+    public void setLocationId(int locationId) {
         this.locationId = locationId;
     }
 }
