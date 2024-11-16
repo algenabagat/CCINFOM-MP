@@ -42,10 +42,6 @@ public class HotelManagement {
 
         } catch (SQLException e) {
             e.printStackTrace();
-        }
-    
-        
+        } 
     }
-
-
 }

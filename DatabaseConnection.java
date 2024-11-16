@@ -41,8 +41,6 @@ public class DatabaseConnection {
                 System.out.println("Login failed. Please check your credentials and try again.\n");
             }
         }
-
-        input.close();
         return loggedIn;
     }
 
@@ -53,5 +51,4 @@ public class DatabaseConnection {
         }
         return DriverManager.getConnection(URL, username, password);
     }
-
 }
