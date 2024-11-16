@@ -5,7 +5,7 @@ public class HotelDBDriver {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
-        HotelManagement hotelManagement = new HotelManagement(scanner);
+        MainView hotelManagement = new MainView(scanner);
         EmployeeManagement employeeManagement = new EmployeeManagement(scanner);
         ReservationManagement reservationManagement = new ReservationManagement(scanner);
         PaymentManagement paymentManagement = new PaymentManagement(scanner);
@@ -24,16 +24,25 @@ public class HotelDBDriver {
             scanner.nextLine(); // Consume newline
 
             switch (choice) {
-                case 1 -> hotelManagement.showMenu();
-                case 2 -> employeeManagement.showMenu();
-                case 3 -> reservationManagement.showMenu();
-                case 4 -> paymentManagement.showMenu();
-                case 0 -> {
+                case 1:
+                    hotelManagement.showMenu();
+                    break;
+                case 2:
+                    employeeManagement.showMenu();
+                    break;
+                case 3:
+                    reservationManagement.showMenu();
+                    break;
+                case 4:
+                    paymentManagement.showMenu();
+                    break;
+                case 0:
                     System.out.println("Exiting the system. Goodbye!");
                     scanner.close();
                     System.exit(0);
-                }
-                default -> System.out.println("Invalid choice. Please try again.");
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
             }
         }
     }
