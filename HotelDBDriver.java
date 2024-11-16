@@ -5,11 +5,20 @@ public class HotelDBDriver {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
-        MainView hotelManagement = new MainView(scanner);
+        // Call login method before proceeding to main menu
+        if (!DatabaseConnection.login()) {
+            System.out.println("Login failed. Exiting the system.");
+            scanner.close();
+            return; // Exit the program if login fails
+        }
+
+        // Instantiate management classes after successful login
+        HotelManagementView hotelManagement = new HotelManagementView(scanner);
         EmployeeManagement employeeManagement = new EmployeeManagement(scanner);
         ReservationManagement reservationManagement = new ReservationManagement(scanner);
         PaymentManagement paymentManagement = new PaymentManagement(scanner);
 
+        // Main menu loop
         System.out.println("Welcome to the Hotel Management System");
         while (true) {
             System.out.println("\nMain Menu:");
@@ -18,10 +27,10 @@ public class HotelDBDriver {
             System.out.println("3. Reservation Management");
             System.out.println("4. Payment Management");
             System.out.println("0. Exit");
-
             System.out.print("Choose an option: ");
+            // Read integer option and consume the newline left by nextInt()
             int choice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
+            scanner.nextLine(); // This consumes the remaining newline character after nextInt()
 
             switch (choice) {
                 case 1:

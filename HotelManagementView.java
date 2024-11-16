@@ -1,9 +1,9 @@
 import java.util.Scanner;
 
-public class MainView {
+public class HotelManagementView {
     private final Scanner scanner;
 
-    public MainView(Scanner scanner) {
+    public HotelManagementView(Scanner scanner) {
         this.scanner = scanner;
     }
 
