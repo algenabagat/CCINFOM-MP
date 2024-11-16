@@ -27,6 +27,7 @@ public class HotelDBDriver {
             System.out.println("4. Payment Management");
             System.out.println("0. Exit");
 
+
             System.out.print("Choose an option: ");
             String input = scanner.nextLine();  // Read the whole line
 
