@@ -44,4 +44,10 @@ public class PaymentManagement {
             logger.log(Level.SEVERE, "SQL Exception occurred while viewing payment details", e);
         }
     }
+    public static void processPayment() {
+        // Placeholder method for processing payment
+        // Adds payment record to the database
+        // Includes discounts and other types of payments
+        System.out.println("Processing payment...");
+    }
 }

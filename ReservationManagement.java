@@ -1,9 +1,54 @@
 import java.sql.*;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ReservationManagement {
     private static final Logger logger = Logger.getLogger(ReservationManagement.class.getName());
+
+    public static void addReservation() {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter Guest ID: ");
+        int guestId = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+
+        System.out.print("Enter Hotel ID: ");
+        int hotelId = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+
+        System.out.print("Enter Check-in Date (YYYY-MM-DD): ");
+        String checkinDate = scanner.nextLine();
+
+        System.out.print("Enter Check-out Date (YYYY-MM-DD): ");
+        String checkoutDate = scanner.nextLine();
+
+        System.out.print("Enter Reservation Status: ");
+        String reservationStatus = scanner.nextLine();
+
+        String query = "INSERT INTO reservation (GUEST_ID, HOTEL_ID, CHECKIN_DATE, CHECKOUT_DATE, RESERVATION_STATUS) " +
+                "VALUES (?, ?, ?, ?, ?)";
+
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = con.prepareStatement(query)) {
+
+            pstmt.setInt(1, guestId);
+            pstmt.setInt(2, hotelId);
+            pstmt.setDate(3, Date.valueOf(checkinDate));
+            pstmt.setDate(4, Date.valueOf(checkoutDate));
+            pstmt.setString(5, reservationStatus);
+
+            int rowsAffected = pstmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Reservation added successfully.");
+            } else {
+                System.out.println("Failed to add reservation.");
+            }
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "SQL Exception occurred while adding reservation", e);
+        }
+    }
 
     public static void viewReservations() {
         String query = "SELECT " +
@@ -46,6 +91,72 @@ public class ReservationManagement {
 
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "SQL Exception occurred while viewing reservation details", e);
+        }
+    }
+
+    public static void updateReservation() {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter Reservation ID: ");
+        int reservationId = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+
+        System.out.print("Enter New Check-in Date (YYYY-MM-DD): ");
+        String newCheckinDate = scanner.nextLine();
+
+        System.out.print("Enter New Check-out Date (YYYY-MM-DD): ");
+        String newCheckoutDate = scanner.nextLine();
+
+        System.out.print("Enter New Reservation Status: ");
+        String newReservationStatus = scanner.nextLine();
+
+        String query = "UPDATE reservation " +
+                "SET CHECKIN_DATE = ?, CHECKOUT_DATE = ?, RESERVATION_STATUS = ? " +
+                "WHERE RESERVATION_ID = ?";
+
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = con.prepareStatement(query)) {
+
+            pstmt.setDate(1, Date.valueOf(newCheckinDate));
+            pstmt.setDate(2, Date.valueOf(newCheckoutDate));
+            pstmt.setString(3, newReservationStatus);
+            pstmt.setInt(4, reservationId);
+
+            int rowsAffected = pstmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Reservation updated successfully.");
+            } else {
+                System.out.println("Failed to update reservation.");
+            }
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "SQL Exception occurred while updating reservation", e);
+        }
+    }
+
+    public static void cancelReservation() {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter Reservation ID to cancel: ");
+        int reservationId = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+
+        String query = "DELETE FROM reservation WHERE RESERVATION_ID = ?";
+
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = con.prepareStatement(query)) {
+
+            pstmt.setInt(1, reservationId);
+
+            int rowsAffected = pstmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Reservation cancelled successfully.");
+            } else {
+                System.out.println("Failed to cancel reservation.");
+            }
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "SQL Exception occurred while cancelling reservation", e);
         }
     }
 }

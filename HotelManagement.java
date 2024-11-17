@@ -104,4 +104,155 @@ public class HotelManagement {
             }
         }
     }
+
+    public static void deleteRoom() {
+        Scanner scanner = new Scanner(System.in);
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+
+        try {
+            // Prompt the user for input
+            System.out.print("Enter Room ID to delete: ");
+            int roomId = scanner.nextInt();
+            scanner.nextLine();  // Consume the newline left by nextInt()
+
+            // Establish a connection to the database
+            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/hotel_db", "username", "password");
+
+            // Prepare the SQL DELETE statement
+            String deleteSQL = "DELETE FROM room WHERE ROOM_ID = ?";
+            preparedStatement = connection.prepareStatement(deleteSQL);
+            preparedStatement.setInt(1, roomId);
+
+            // Execute the delete
+            int rowsAffected = preparedStatement.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Room deleted successfully.");
+            } else {
+                System.out.println("No room found with the given ID.");
+            }
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "SQL Exception occurred while deleting room", e);
+        } finally {
+            // Close the resources
+            try {
+                if (preparedStatement != null) {
+                    preparedStatement.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
+            } catch (SQLException e) {
+                logger.log(Level.SEVERE, "SQL Exception occurred while closing resources", e);
+            }
+        }
+    }
+
+    public static void createRoom() {
+        Scanner scanner = new Scanner(System.in);
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+
+        try {
+            // Prompt the user for input
+            System.out.print("Enter Room Number: ");
+            int roomNumber = scanner.nextInt();
+            scanner.nextLine();  // Consume the newline left by nextInt()
+
+            System.out.print("Enter Room Type: ");
+            String roomType = scanner.nextLine();
+
+            System.out.print("Enter Room Rate: ");
+            double roomRate = scanner.nextDouble();
+            scanner.nextLine();  // Consume the newline left by nextDouble()
+
+            // Establish a connection to the database
+            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/hotel_db", "username", "password");
+
+            // Prepare the SQL INSERT statement
+            String insertSQL = "INSERT INTO room (ROOM_NUMBER, ROOM_TYPE, ROOM_RATE) VALUES (?, ?, ?)";
+            preparedStatement = connection.prepareStatement(insertSQL);
+            preparedStatement.setInt(1, roomNumber);
+            preparedStatement.setString(2, roomType);
+            preparedStatement.setDouble(3, roomRate);
+
+            // Execute the insert
+            int rowsAffected = preparedStatement.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Room created successfully.");
+            } else {
+                System.out.println("Room creation failed.");
+            }
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "SQL Exception occurred while creating room", e);
+        } finally {
+            // Close the resources
+            try {
+                if (preparedStatement != null) {
+                    preparedStatement.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
+            } catch (SQLException e) {
+                logger.log(Level.SEVERE, "SQL Exception occurred while closing resources", e);
+            }
+        }
+    }
+    public static void updateRoomDetails() {
+        Scanner scanner = new Scanner(System.in);
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+
+        try {
+            // Prompt the user for input
+            System.out.print("Enter Room ID to update: ");
+            int roomId = scanner.nextInt();
+            scanner.nextLine();  // Consume the newline left by nextInt()
+
+            System.out.print("Enter new Room Number: ");
+            int roomNumber = scanner.nextInt();
+            scanner.nextLine();  // Consume the newline left by nextInt()
+
+            System.out.print("Enter new Room Type: ");
+            String roomType = scanner.nextLine();
+
+            System.out.print("Enter new Room Rate: ");
+            double roomRate = scanner.nextDouble();
+            scanner.nextLine();  // Consume the newline left by nextDouble()
+
+            // Establish a connection to the database
+            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/hotel_db", "username", "password");
+
+            // Prepare the SQL UPDATE statement
+            String updateSQL = "UPDATE room SET ROOM_NUMBER = ?, ROOM_TYPE = ?, ROOM_RATE = ? WHERE ROOM_ID = ?";
+            preparedStatement = connection.prepareStatement(updateSQL);
+            preparedStatement.setInt(1, roomNumber);
+            preparedStatement.setString(2, roomType);
+            preparedStatement.setDouble(3, roomRate);
+            preparedStatement.setInt(4, roomId);
+
+            // Execute the update
+            int rowsAffected = preparedStatement.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Room details updated successfully.");
+            } else {
+                System.out.println("No room found with the given ID.");
+            }
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "SQL Exception occurred while updating room details", e);
+        } finally {
+            // Close the resources
+            try {
+                if (preparedStatement != null) {
+                    preparedStatement.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
+            } catch (SQLException e) {
+                logger.log(Level.SEVERE, "SQL Exception occurred while closing resources", e);
+            }
+        }
+    }
 }
