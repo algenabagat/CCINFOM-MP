@@ -1,7 +1,7 @@
 import java.util.Scanner;
 
 import classes.Payment;
-
+//
 public class PaymentManagementView {
     private final Scanner scanner;
 
