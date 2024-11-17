@@ -52,23 +52,23 @@ public class ReservationManagement {
 
     public static void viewReservations() {
         String query = "SELECT " +
-            "r.RESERVATION_ID, r.GUEST_ID, g.GUEST_NAME, r.CHECKIN_DATE, r.CHECKOUT_DATE, " +
-            "r.RESERVATION_STATUS, h.HOTEL_NAME " +
-            "FROM reservation r " +
-            "JOIN hotel h ON r.HOTEL_ID = h.HOTEL_ID " +
-            "JOIN guest g ON r.GUEST_ID = g.GUEST_ID " +
-            "ORDER BY r.RESERVATION_ID";  // Ordering by RESERVATION_ID in ascending order
-
+                "r.RESERVATION_ID, r.GUEST_ID, g.GUEST_NAME, r.CHECKIN_DATE, r.CHECKOUT_DATE, " +
+                "r.RESERVATION_STATUS, h.HOTEL_NAME, ro.ROOM_NO " +  // Added ROOM_NO
+                "FROM reservation r " +
+                "JOIN guest g ON r.GUEST_ID = g.GUEST_ID " +  // Join with guest table
+                "JOIN rooms ro ON r.ROOM_ID = ro.ROOM_ID " +  // Join with rooms table using ROOM_ID
+                "JOIN hotel h ON ro.HOTEL_ID = h.HOTEL_ID " +  // Join with hotel table using HOTEL_ID from rooms
+                "ORDER BY r.RESERVATION_ID";  // Ordering by RESERVATION_ID in ascending order
 
         try (Connection con = DatabaseConnection.getConnection();
              Statement stmt = con.createStatement();
              ResultSet rs = stmt.executeQuery(query)) {
 
             // Print the table header with partitions
-            System.out.println("+----------------+------------+---------------------------+--------------+---------------+----------------------+------------------+");
-            System.out.printf("| %-14s | %-10s | %-25s | %-12s | %-15s | %-20s | %-16s |\n",
-                    "Reservation ID", "Guest ID", "Guest Name", "Check-in Date", "Check-out Date", "Reservation Status", "Hotel Name");
-            System.out.println("+----------------+------------+---------------------------+--------------+---------------+----------------------+------------------+");
+            System.out.println("+----------------+------------+---------------------------+--------------+---------------+----------------------+------------------+--------------------+");
+            System.out.printf("| %-14s | %-10s | %-25s | %-12s | %-15s | %-20s | %-16s | %-18s |\n",
+                    "Reservation ID", "Guest ID", "Guest Name", "Check-in Date", "Check-out Date", "Reservation Status", "Hotel Name", "Room Number");
+            System.out.println("+----------------+------------+---------------------------+--------------+---------------+----------------------+------------------+--------------------+");
 
             // Loop through the result set and print each reservation record in tabular format
             while (rs.next()) {
@@ -79,20 +79,23 @@ public class ReservationManagement {
                 Date checkoutDate = rs.getDate("CHECKOUT_DATE");
                 String reservationStatus = rs.getString("RESERVATION_STATUS");
                 String hotelName = rs.getString("HOTEL_NAME");
+                String roomNumber = rs.getString("ROOM_NO");
 
                 // Print the reservation details with partitions and proper borders
-                System.out.printf("| %-14d | %-10d | %-25s | %-12s | %-15s | %-20s | %-16s |\n",
-                        reservationId, guestId, guestName, 
+                System.out.printf("| %-14d | %-10d | %-25s | %-12s | %-15s | %-20s | %-16s | %-18s |\n",
+                        reservationId, guestId, guestName,
                         (checkinDate != null ? checkinDate.toString() : "null"),
                         (checkoutDate != null ? checkoutDate.toString() : "null"),
-                        reservationStatus, hotelName);
-                System.out.println("+----------------+------------+---------------------------+--------------+---------------+----------------------+------------------+");
+                        reservationStatus, hotelName, roomNumber);
+                System.out.println("+----------------+------------+---------------------------+--------------+---------------+----------------------+------------------+--------------------+");
             }
 
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "SQL Exception occurred while viewing reservation details", e);
         }
     }
+
+
 
     public static void updateReservation() {
         Scanner scanner = new Scanner(System.in);
