@@ -13,17 +13,18 @@ public class EmployeeManagement {
                 "e.SALARY, e.HIRE_DATE, e.END_DATE " +
                 "FROM employee e " +
                 "JOIN jobs j ON e.JOB_ID = j.JOB_ID " +
-                "JOIN hotel h ON e.HOTEL_ID = h.HOTEL_ID";
+                "JOIN hotel h ON e.HOTEL_ID = h.HOTEL_ID " +
+                "ORDER BY e.EMPLOYEE_ID"; // Added ORDER BY clause
 
         try (Connection con = DatabaseConnection.getConnection();
              Statement stmt = con.createStatement();
              ResultSet rs = stmt.executeQuery(query)) {
 
             // Print the table header with partitions
-            System.out.println("+--------------+-------------------------------------+--------------------------------+----------------------------+---------------------+----------------------+--------------+------------+------------+");
-            System.out.printf("| %-12s | %-35s | %-30s | %-26s | %-19s | %-20s | %-12s | %-10s | %-10s |\n",
+            System.out.println("+--------------+-------------------------------------+-----------------------------------------+----------------------------+---------------------+----------------------+--------------+------------+------------+");
+            System.out.printf("| %-12s | %-35s | %-40s | %-26s | %-19s | %-20s | %-12s | %-10s | %-10s |\n",
                     "Employee ID", "Employee Name", "Job", "Email", "Phone Number", "Hotel Name", "Salary", "Hire Date", "End Date");
-            System.out.println("+--------------+-------------------------------------+--------------------------------+----------------------------+---------------------+----------------------+--------------+------------+------------+");
+            System.out.println("+--------------+-------------------------------------+-----------------------------------------+----------------------------+---------------------+----------------------+--------------+------------+------------+");
 
             // Loop through the result set and print each employee record in tabular format with partitions
             while (rs.next()) {
@@ -38,10 +39,10 @@ public class EmployeeManagement {
                 Date endDate = rs.getDate("END_DATE");
 
                 // Print the employee details with partitions and proper borders
-                System.out.printf("| %-12d | %-35s | %-30s | %-26s | %-19s | %-20s | %-12.2f | %-10s | %-10s |\n",
+                System.out.printf("| %-12d | %-35s | %-40s | %-26s | %-19s | %-20s | %-12.2f | %-10s | %-10s |\n",
                         employeeId, employeeName, job, email, phoneNumber, hotelName, salary,
                         (hireDate != null ? hireDate.toString() : "null"), (endDate != null ? endDate.toString() : "null"));
-                System.out.println("+--------------+-------------------------------------+--------------------------------+----------------------------+---------------------+----------------------+--------------+------------+------------+");
+                System.out.println("+--------------+-------------------------------------+-----------------------------------------+----------------------------+---------------------+----------------------+--------------+------------+------------+");
             }
 
         } catch (SQLException e) {
