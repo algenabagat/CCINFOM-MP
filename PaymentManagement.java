@@ -49,5 +49,24 @@ public class PaymentManagement {
         // Adds payment record to the database
         // Includes discounts and other types of payments
         System.out.println("Processing payment...");
+        //room price * (1 - discount_percent) = total price
+    }
+
+    public static void addDiscount() {
+        // Placeholder method for adding discount
+        // Adds discount record to the database
+        System.out.println("Adding discount...");
+    }
+
+    public static void updateDiscount() {
+        // Placeholder method for updating payment
+        // Updates payment record in the database
+        System.out.println("Updating payment...");
+    }
+
+    public static void deleteDiscount() {
+        // Placeholder method for deleting payment
+        // Deletes payment record from the database
+        System.out.println("Deleting payment...");
     }
 }

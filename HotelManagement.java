@@ -6,6 +6,50 @@ import java.util.logging.Logger;
 public class HotelManagement {
     private static final Logger logger = Logger.getLogger(HotelManagement.class.getName());
 
+    public static void createHotel(){
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter Hotel Name: ");
+        String hotelName = scanner.nextLine();
+
+        System.out.print("Enter Hotel Email: ");
+        String hotelEmail = scanner.nextLine();
+
+        System.out.print("Enter Contact Number: ");
+        String contactNo = scanner.nextLine();
+
+        System.out.print("Enter Location ID: ");
+        int locationId = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+
+        String query = "INSERT INTO hotel (HOTEL_NAME, HOTEL_EMAIL, CONTACT_NO, LOCATION_ID) " +
+                "VALUES (?, ?, ?, ?)";
+
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = con.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+
+            pstmt.setString(1, hotelName);
+            pstmt.setString(2, hotelEmail);
+            pstmt.setString(3, contactNo);
+            pstmt.setInt(4, locationId);
+
+            int rowsAffected = pstmt.executeUpdate();
+            if (rowsAffected > 0) {
+                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        int hotelId = generatedKeys.getInt(1);
+                        System.out.println("Hotel created successfully with ID: " + hotelId);
+                    }
+                }
+            } else {
+                System.out.println("Failed to create hotel.");
+            }
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "SQL Exception occurred while creating hotel", e);
+        }
+    }
+
     public static void viewHotelDetails() {
         String query = "SELECT " +
                 "h.HOTEL_ID, h.HOTEL_NAME, " +
@@ -89,35 +133,34 @@ public class HotelManagement {
         }
     }
 
-
-    public static void deleteRoom() {
+    public static void deleteHotel() {
         Scanner scanner = new Scanner(System.in);
         Connection connection = null;
         PreparedStatement preparedStatement = null;
 
         try {
             // Prompt the user for input
-            System.out.print("Enter Room ID to delete: ");
-            int roomId = scanner.nextInt();
+            System.out.print("Enter Hotel ID to delete: ");
+            int hotelId = scanner.nextInt();
             scanner.nextLine();  // Consume the newline left by nextInt()
 
             // Establish a connection to the database
             connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/hotel_db", "username", "password");
 
             // Prepare the SQL DELETE statement
-            String deleteSQL = "DELETE FROM room WHERE ROOM_ID = ?";
+            String deleteSQL = "DELETE FROM hotel WHERE HOTEL_ID = ?";
             preparedStatement = connection.prepareStatement(deleteSQL);
-            preparedStatement.setInt(1, roomId);
+            preparedStatement.setInt(1, hotelId);
 
             // Execute the delete
             int rowsAffected = preparedStatement.executeUpdate();
             if (rowsAffected > 0) {
-                System.out.println("Room deleted successfully.");
+                System.out.println("Hotel deleted successfully.");
             } else {
-                System.out.println("No room found with the given ID.");
+                System.out.println("No hotel found with the given ID.");
             }
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "SQL Exception occurred while deleting room", e);
+            logger.log(Level.SEVERE, "SQL Exception occurred while deleting hotel", e);
         } finally {
             // Close the resources
             try {
