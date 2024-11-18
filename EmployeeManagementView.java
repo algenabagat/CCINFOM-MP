@@ -35,6 +35,8 @@ public class EmployeeManagementView {
                     break;
                 case 4:
                     deleteEmployee();
+                    EmployeeManagement.viewEmployeeDetails();
+                    EmployeeManagement.deleteEmployee();
                     break;
                 case 0:
                     return;
