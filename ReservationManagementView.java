@@ -23,6 +23,7 @@ public class ReservationManagementView {
             switch (choice) {
                 case 1:
                     addReservation();
+                    ReservationManagement.addReservation();
                     break;
                 case 2:
                     viewReservations();
@@ -30,9 +31,12 @@ public class ReservationManagementView {
                     break;
                 case 3:
                     updateReservation();
+                    ReservationManagement.updateReservation();
                     break;
                 case 4:
                     cancelReservation();
+                    ReservationManagement.viewReservations();
+                    ReservationManagement.cancelReservation();
                     break;
                 case 0:
                     return;

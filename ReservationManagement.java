@@ -13,8 +13,8 @@ public class ReservationManagement {
         int guestId = scanner.nextInt();
         scanner.nextLine(); // Consume newline
 
-        System.out.print("Enter Hotel ID: ");
-        int hotelId = scanner.nextInt();
+        System.out.print("Enter Room ID: ");
+        int roomId = scanner.nextInt();
         scanner.nextLine(); // Consume newline
 
         System.out.print("Enter Check-in Date (YYYY-MM-DD): ");
@@ -23,22 +23,45 @@ public class ReservationManagement {
         System.out.print("Enter Check-out Date (YYYY-MM-DD): ");
         String checkoutDate = scanner.nextLine();
 
-        System.out.print("Enter Reservation Status: ");
-        String reservationStatus = scanner.nextLine();
+        // Set reservation status to "Confirmed" automatically
+        String reservationStatus = "Confirmed";
 
-        String query = "INSERT INTO reservation (GUEST_ID, HOTEL_ID, CHECKIN_DATE, CHECKOUT_DATE, RESERVATION_STATUS) " +
+        String checkOverlapQuery = "SELECT COUNT(*) AS overlap_count FROM reservation " +
+                "WHERE ROOM_ID = ? AND " +
+                "((CHECKIN_DATE <= ? AND CHECKOUT_DATE > ?) OR " +
+                "(CHECKIN_DATE < ? AND CHECKOUT_DATE >= ?))";
+
+        String insertQuery = "INSERT INTO reservation (GUEST_ID, ROOM_ID, CHECKIN_DATE, CHECKOUT_DATE, RESERVATION_STATUS) " +
                 "VALUES (?, ?, ?, ?, ?)";
 
         try (Connection con = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = con.prepareStatement(query)) {
+             PreparedStatement checkStmt = con.prepareStatement(checkOverlapQuery);
+             PreparedStatement insertStmt = con.prepareStatement(insertQuery)) {
 
-            pstmt.setInt(1, guestId);
-            pstmt.setInt(2, hotelId);
-            pstmt.setDate(3, Date.valueOf(checkinDate));
-            pstmt.setDate(4, Date.valueOf(checkoutDate));
-            pstmt.setString(5, reservationStatus);
+            // Check for overlapping reservations
+            checkStmt.setInt(1, roomId);
+            checkStmt.setDate(2, Date.valueOf(checkinDate));
+            checkStmt.setDate(3, Date.valueOf(checkinDate));
+            checkStmt.setDate(4, Date.valueOf(checkoutDate));
+            checkStmt.setDate(5, Date.valueOf(checkoutDate));
 
-            int rowsAffected = pstmt.executeUpdate();
+            ResultSet rs = checkStmt.executeQuery();
+            rs.next();
+            int overlapCount = rs.getInt("overlap_count");
+
+            if (overlapCount > 0) {
+                System.out.println("Cannot add reservation! The selected room already has a reservation on the selected dates.");
+                return;
+            }
+
+            // Insert the reservation
+            insertStmt.setInt(1, guestId);
+            insertStmt.setInt(2, roomId);
+            insertStmt.setDate(3, Date.valueOf(checkinDate));
+            insertStmt.setDate(4, Date.valueOf(checkoutDate));
+            insertStmt.setString(5, reservationStatus);
+
+            int rowsAffected = insertStmt.executeUpdate();
             if (rowsAffected > 0) {
                 System.out.println("Reservation added successfully.");
             } else {
@@ -49,6 +72,7 @@ public class ReservationManagement {
             logger.log(Level.SEVERE, "SQL Exception occurred while adding reservation", e);
         }
     }
+
 
     public static void viewReservations() {
         String query = "SELECT " +
