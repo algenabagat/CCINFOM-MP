@@ -30,6 +30,7 @@ public class EmployeeManagementView {
                     break;
                 case 3:
                     updateEmployeeDetails();
+                    EmployeeManagement.updateEmployeeDetails();
                     break;
                 case 4:
                     deleteEmployee();
