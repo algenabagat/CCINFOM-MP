@@ -135,44 +135,51 @@ public class HotelManagement {
 
     public static void deleteHotel() {
         Scanner scanner = new Scanner(System.in);
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
 
-        try {
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement checkHotelStatement = connection.prepareStatement(
+                     "SELECT COUNT(*) FROM hotel WHERE HOTEL_ID = ?");
+             PreparedStatement checkUpcomingReservationsStatement = connection.prepareStatement(
+                     "SELECT COUNT(*) FROM reservation r " +
+                             "INNER JOIN rooms rm ON r.ROOM_ID = rm.ROOM_ID " +
+                             "WHERE rm.HOTEL_ID = ? AND r.CHECKOUT_DATE >= CURRENT_DATE");
+             PreparedStatement deleteHotelStatement = connection.prepareStatement(
+                     "DELETE FROM hotel WHERE HOTEL_ID = ?")) {
+
             // Prompt the user for input
             System.out.print("Enter Hotel ID to delete: ");
             int hotelId = scanner.nextInt();
-            scanner.nextLine();  // Consume the newline left by nextInt()
+            scanner.nextLine(); // Consume the newline
 
-            // Establish a connection to the database
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/hotel_db", "username", "password");
+            // Check if the hotel exists
+            checkHotelStatement.setInt(1, hotelId);
+            try (ResultSet hotelResultSet = checkHotelStatement.executeQuery()) {
+                if (hotelResultSet.next() && hotelResultSet.getInt(1) == 0) {
+                    System.out.println("No hotel found with the given ID.");
+                    return;
+                }
+            }
 
-            // Prepare the SQL DELETE statement
-            String deleteSQL = "DELETE FROM hotel WHERE HOTEL_ID = ?";
-            preparedStatement = connection.prepareStatement(deleteSQL);
-            preparedStatement.setInt(1, hotelId);
+            // Check for active or upcoming reservations
+            checkUpcomingReservationsStatement.setInt(1, hotelId);
+            try (ResultSet reservationsResultSet = checkUpcomingReservationsStatement.executeQuery()) {
+                if (reservationsResultSet.next() && reservationsResultSet.getInt(1) > 0) {
+                    System.out.println("Cannot delete hotel! There are active or upcoming reservations.");
+                    return;
+                }
+            }
 
-            // Execute the delete
-            int rowsAffected = preparedStatement.executeUpdate();
+            // Delete the hotel
+            deleteHotelStatement.setInt(1, hotelId);
+            int rowsAffected = deleteHotelStatement.executeUpdate();
             if (rowsAffected > 0) {
                 System.out.println("Hotel deleted successfully.");
             } else {
-                System.out.println("No hotel found with the given ID.");
+                System.out.println("Failed to delete hotel.");
             }
+
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "SQL Exception occurred while deleting hotel", e);
-        } finally {
-            // Close the resources
-            try {
-                if (preparedStatement != null) {
-                    preparedStatement.close();
-                }
-                if (connection != null) {
-                    connection.close();
-                }
-            } catch (SQLException e) {
-                logger.log(Level.SEVERE, "SQL Exception occurred while closing resources", e);
-            }
         }
     }
 

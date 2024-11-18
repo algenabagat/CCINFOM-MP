@@ -3,6 +3,7 @@ import java.util.Scanner;
 
 public class HotelManagementView {
    private final Scanner scanner;
+
    public HotelManagementView(Scanner var1) {
       this.scanner = var1;
    }
@@ -39,6 +40,8 @@ public class HotelManagementView {
                break;
             case 5:
                this.deleteHotel();
+               HotelManagement.viewHotelDetails();
+               HotelManagement.deleteHotel();
                break;
             default:
                System.out.println("Invalid choice. Please try again.");
