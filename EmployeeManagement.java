@@ -56,9 +56,7 @@ public class EmployeeManagement {
         System.out.print("Enter Employee Name: ");
         String employeeName = scanner.nextLine();
 
-        System.out.print("Enter Job ID: ");
-        int jobId = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
+        // Remove the Job ID input since it's auto-incremented
 
         System.out.print("Enter Email: ");
         String email = scanner.nextLine();
@@ -80,23 +78,23 @@ public class EmployeeManagement {
         System.out.print("Enter End Date (YYYY-MM-DD) or leave blank: ");
         String endDate = scanner.nextLine();
 
-        String query = "INSERT INTO employee (EMPLOYEE_NAME, JOB_ID, EMAIL, CONTACT_NO, HOTEL_ID, SALARY, HIRE_DATE, END_DATE) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        // Insert query without Job ID, assuming the DB will handle it automatically
+        String query = "INSERT INTO employee (EMPLOYEE_NAME, EMAIL, CONTACT_NO, HOTEL_ID, SALARY, HIRE_DATE, END_DATE) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection con = DatabaseConnection.getConnection();
              PreparedStatement pstmt = con.prepareStatement(query)) {
 
             pstmt.setString(1, employeeName);
-            pstmt.setInt(2, jobId);
-            pstmt.setString(3, email);
-            pstmt.setString(4, phoneNumber);
-            pstmt.setInt(5, hotelId);
-            pstmt.setDouble(6, salary);
-            pstmt.setDate(7, Date.valueOf(hireDate));
+            pstmt.setString(2, email);
+            pstmt.setString(3, phoneNumber);
+            pstmt.setInt(4, hotelId);
+            pstmt.setDouble(5, salary);
+            pstmt.setDate(6, Date.valueOf(hireDate));
             if (endDate.isEmpty()) {
-                pstmt.setNull(8, Types.DATE);
+                pstmt.setNull(7, Types.DATE);
             } else {
-                pstmt.setDate(8, Date.valueOf(endDate));
+                pstmt.setDate(7, Date.valueOf(endDate));
             }
 
             int rowsAffected = pstmt.executeUpdate();
@@ -110,6 +108,7 @@ public class EmployeeManagement {
             logger.log(Level.SEVERE, "SQL Exception occurred while adding employee", e);
         }
     }
+
 
     public static void updateEmployeeDetails() {
         Scanner scanner = new Scanner(System.in);

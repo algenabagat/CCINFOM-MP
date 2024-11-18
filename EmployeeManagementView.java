@@ -27,6 +27,7 @@ public class EmployeeManagementView {
                     break;
                 case 2:
                     addEmployee();
+                    EmployeeManagement.addEmployee();
                     break;
                 case 3:
                     updateEmployeeDetails();
