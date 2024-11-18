@@ -52,14 +52,15 @@ public class HotelManagement {
 
     public static void updateHotelDetails() {
         Scanner scanner = new Scanner(System.in);
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
 
-        try {
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(
+                     "UPDATE hotel SET HOTEL_NAME = ?, HOTEL_EMAIL = ?, CONTACT_NO = ? WHERE HOTEL_ID = ?")) {
+
             // Prompt the user for input
             System.out.print("Enter Hotel ID to update: ");
             int hotelId = scanner.nextInt();
-            scanner.nextLine();  // Consume the newline left by nextInt()
+            scanner.nextLine(); // Consume the newline
 
             System.out.print("Enter new Hotel Name: ");
             String name = scanner.nextLine();
@@ -70,12 +71,7 @@ public class HotelManagement {
             System.out.print("Enter new Hotel Contact Number: ");
             String contact = scanner.nextLine();
 
-            // Establish a connection to the database
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/hotel_db", "username", "password");
-
-            // Prepare the SQL UPDATE statement
-            String updateSQL = "UPDATE hotel SET HOTEL_NAME = ?, HOTEL_EMAIL = ?, CONTACT_NO = ? WHERE HOTEL_ID = ?";
-            preparedStatement = connection.prepareStatement(updateSQL);
+            // Prepare the SQL statement
             preparedStatement.setString(1, name);
             preparedStatement.setString(2, email);
             preparedStatement.setString(3, contact);
@@ -90,20 +86,9 @@ public class HotelManagement {
             }
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "SQL Exception occurred while updating hotel details", e);
-        } finally {
-            // Close the resources
-            try {
-                if (preparedStatement != null) {
-                    preparedStatement.close();
-                }
-                if (connection != null) {
-                    connection.close();
-                }
-            } catch (SQLException e) {
-                logger.log(Level.SEVERE, "SQL Exception occurred while closing resources", e);
-            }
         }
     }
+
 
     public static void deleteRoom() {
         Scanner scanner = new Scanner(System.in);
