@@ -31,12 +31,17 @@ public class PaymentManagementView {
                     break;
                 case 3:
                     addDiscount();
+                    PaymentManagement.addDiscount();
                     break;
                 case 4:
                     updateDiscount();
+                    PaymentManagement.showDiscount();
+                    PaymentManagement.updateDiscount();
                     break;
                 case 5:
                     deleteDiscount();
+                    PaymentManagement.showDiscount();
+                    PaymentManagement.deleteDiscount();
                     break;
                 case 0:
                     return;

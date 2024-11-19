@@ -31,6 +31,7 @@ public class ReservationManagementView {
                     break;
                 case 3:
                     updateReservation();
+                    ReservationManagement.viewReservations();
                     ReservationManagement.updateReservation();
                     break;
                 case 4:

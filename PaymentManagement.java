@@ -1,4 +1,5 @@
 import java.sql.*;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -53,20 +54,180 @@ public class PaymentManagement {
     }
 
     public static void addDiscount() {
-        // Placeholder method for adding discount
-        // Adds discount record to the database
-        System.out.println("Adding discount...");
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter Discount Name: ");
+        String discountName = scanner.nextLine();
+
+        System.out.print("Enter Discount Percentage (e.g., 0.10 for 10%): ");
+        double discountPercentage;
+        try {
+            discountPercentage = scanner.nextDouble();
+            if (discountPercentage < 0 || discountPercentage > 1) {
+                System.out.println("Error: Discount percentage must be between 0 and 1.");
+                return;
+            }
+        } catch (Exception e) {
+            System.out.println("Error: Invalid discount percentage format.");
+            return;
+        }
+
+        String insertQuery = "INSERT INTO discount (DISCOUNT_NAME, DISCOUNT_PERCENTAGE) VALUES (?, ?)";
+
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = con.prepareStatement(insertQuery)) {
+
+            pstmt.setString(1, discountName);
+            pstmt.setDouble(2, discountPercentage);
+
+            int rowsAffected = pstmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Discount added successfully.");
+            } else {
+                System.out.println("Failed to add discount.");
+            }
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "SQL Exception occurred while adding discount", e);
+        }
     }
 
-    public static void updateDiscount() {
-        // Placeholder method for updating payment
-        // Updates payment record in the database
-        System.out.println("Updating payment...");
+    public static void showDiscount() {
+        String query = "SELECT * FROM discount";
+
+        try (Connection con = DatabaseConnection.getConnection();
+             Statement stmt = con.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+
+            // Print the table header with partitions
+            System.out.println("+-------------+------------------------+----------------------+");
+            System.out.printf("| %-11s | %-22s | %-20s |\n", "Discount ID", "Discount Name", "Discount Percentage");
+            System.out.println("+-------------+------------------------+----------------------+");
+
+            // Loop through the result set and print each discount record in tabular format
+            while (rs.next()) {
+                int discountId = rs.getInt("DISCOUNT_ID");
+                String discountName = rs.getString("DISCOUNT_NAME");
+                double discountPercentage = rs.getDouble("DISCOUNT_PERCENTAGE");
+
+                // Print the discount details with partitions and proper borders
+                System.out.printf("| %-11d | %-22s | %-20.4f |\n", discountId, discountName, discountPercentage);
+                System.out.println("+-------------+------------------------+----------------------+");
+            }
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "SQL Exception occurred while showing discount details", e);
+        }
     }
 
     public static void deleteDiscount() {
-        // Placeholder method for deleting payment
-        // Deletes payment record from the database
-        System.out.println("Deleting payment...");
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter the Discount ID to delete: ");
+        int discountId = scanner.nextInt();
+
+        String checkQuery = "SELECT COUNT(*) AS count FROM discount WHERE DISCOUNT_ID = ?";
+        String deleteQuery = "DELETE FROM discount WHERE DISCOUNT_ID = ?";
+
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement checkStmt = con.prepareStatement(checkQuery);
+             PreparedStatement deleteStmt = con.prepareStatement(deleteQuery)) {
+
+            // Check if the discount exists
+            checkStmt.setInt(1, discountId);
+            ResultSet rs = checkStmt.executeQuery();
+            rs.next();
+            int count = rs.getInt("count");
+
+            if (count == 0) {
+                System.out.println("Error: Discount ID " + discountId + " does not exist. No action taken.");
+                return;
+            }
+
+            // Proceed to delete if exists
+            deleteStmt.setInt(1, discountId);
+            int rowsAffected = deleteStmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                System.out.println("Discount with ID " + discountId + " has been successfully deleted.");
+            } else {
+                System.out.println("Failed to delete the discount. Please try again.");
+            }
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "SQL Exception occurred while deleting the discount", e);
+        }
     }
+
+    public static void updateDiscount() {
+        Scanner scanner = new Scanner(System.in);
+
+        // Prompt user for discount ID to update
+        System.out.print("Enter the Discount ID to update: ");
+        int discountId = scanner.nextInt();
+
+        // Check if discount exists in the database before updating
+        boolean exists = false;
+        String checkQuery = "SELECT COUNT(*) FROM discount WHERE DISCOUNT_ID = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(checkQuery)) {
+
+            stmt.setInt(1, discountId);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next() && rs.getInt(1) > 0) {
+                exists = true;
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error checking if discount exists.");
+            logger.log(Level.SEVERE, "SQL Exception occurred while showing discount details", e);
+        }
+
+        if (!exists) {
+            System.out.println("Discount with ID " + discountId + " does not exist.");
+            return;
+        }
+
+        // Prompt user for new discount details
+        System.out.print("Enter the new discount name: ");
+        scanner.nextLine();  // Consume newline character left by nextInt
+        String newDiscountName = scanner.nextLine();
+
+        // Validate discount percentage between 0 and 1 (inclusive)
+        double newDiscountPercentage;
+        while (true) {
+            System.out.print("Enter the new discount percentage (between 0 and 1): ");
+            newDiscountPercentage = scanner.nextDouble();
+
+            if (newDiscountPercentage >= 0 && newDiscountPercentage <= 1) {
+                break; // Valid input
+            } else {
+                System.out.println("Invalid discount percentage. Please enter a value between 0 and 1.");
+            }
+        }
+
+        // Attempt to update the discount record in the database
+        String updateQuery = "UPDATE discount SET DISCOUNT_NAME = ?, DISCOUNT_PERCENTAGE = ? WHERE DISCOUNT_ID = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(updateQuery)) {
+
+            stmt.setString(1, newDiscountName);
+            stmt.setDouble(2, newDiscountPercentage);
+            stmt.setInt(3, discountId);
+
+            int rowsUpdated = stmt.executeUpdate();
+
+            if (rowsUpdated > 0) {
+                System.out.println("Discount updated successfully.");
+            } else {
+                System.out.println("Failed to update discount.");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error occurred while updating discount.");
+            logger.log(Level.SEVERE, "SQL Exception occurred while showing discount details", e);
+        }
+    }
+
+
 }
