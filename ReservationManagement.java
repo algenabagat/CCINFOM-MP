@@ -89,10 +89,10 @@ public class ReservationManagement {
              ResultSet rs = stmt.executeQuery(query)) {
 
             // Print the table header with partitions
-            System.out.println("+----------------+------------+---------------------------+--------------+---------------+----------------------+------------------+--------------------+");
-            System.out.printf("| %-14s | %-10s | %-25s | %-12s | %-15s | %-20s | %-16s | %-18s |\n",
-                    "Reservation ID", "Guest ID", "Guest Name", "Check-in Date", "Check-out Date", "Reservation Status", "Hotel Name", "Room Number");
-            System.out.println("+----------------+------------+---------------------------+--------------+---------------+----------------------+------------------+--------------------+");
+            System.out.println("+----------------+------------+---------------------------+--------------+-----------------+---------------------+--------------------------------+--------------------+");
+            System.out.printf("| %-14s | %-10s | %-25s | %-12s | %-15s | %-19s | %-30s | %-18s |\n",
+                    "Reservation ID", "Guest ID", "Guest Name", "Check-in", "Check-out", "Reservation Status", "Hotel Name", "Room Number");
+            System.out.println("+----------------+------------+---------------------------+--------------+-----------------+---------------------+--------------------------------+--------------------+");
 
             // Loop through the result set and print each reservation record in tabular format
             while (rs.next()) {
@@ -106,19 +106,18 @@ public class ReservationManagement {
                 String roomNumber = rs.getString("ROOM_NO");
 
                 // Print the reservation details with partitions and proper borders
-                System.out.printf("| %-14d | %-10d | %-25s | %-12s | %-15s | %-20s | %-16s | %-18s |\n",
+                System.out.printf("| %-14d | %-10d | %-25s | %-12s | %-15s | %-19s | %-30s | %-18s |\n",
                         reservationId, guestId, guestName,
                         (checkinDate != null ? checkinDate.toString() : "null"),
                         (checkoutDate != null ? checkoutDate.toString() : "null"),
                         reservationStatus, hotelName, roomNumber);
-                System.out.println("+----------------+------------+---------------------------+--------------+---------------+----------------------+------------------+--------------------+");
+                System.out.println("+----------------+------------+---------------------------+--------------+-----------------+---------------------+--------------------------------+--------------------+");
             }
 
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "SQL Exception occurred while viewing reservation details", e);
         }
     }
-
 
 
     public static void updateReservation() {

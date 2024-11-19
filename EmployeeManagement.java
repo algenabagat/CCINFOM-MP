@@ -49,22 +49,56 @@ public class EmployeeManagement {
     public static void addEmployee() {
         Scanner scanner = new Scanner(System.in);
 
+        // Validate Hotel ID as soon as it's entered
+        System.out.print("Enter Hotel ID: ");
+        int hotelId = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+
+        String validateHotelQuery = "SELECT COUNT(*) FROM hotel WHERE HOTEL_ID = ?";
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement hotelStmt = con.prepareStatement(validateHotelQuery)) {
+
+            hotelStmt.setInt(1, hotelId);
+            try (ResultSet hotelRs = hotelStmt.executeQuery()) {
+                if (!hotelRs.next() || hotelRs.getInt(1) == 0) {
+                    System.out.println("Invalid Hotel ID. Employee creation aborted.");
+                    return; // Abort if the hotel ID is invalid
+                }
+            }
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "SQL Exception occurred while validating Hotel ID", e);
+            return;
+        }
+
         System.out.print("Enter Employee Name: ");
         String employeeName = scanner.nextLine();
 
+        // Validate Job ID as soon as it's entered
         System.out.print("Enter Job ID: ");
         int jobId = scanner.nextInt();
         scanner.nextLine(); // Consume newline
+
+        String validateJobQuery = "SELECT COUNT(*) FROM jobs WHERE JOB_ID = ?";
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement jobStmt = con.prepareStatement(validateJobQuery)) {
+
+            jobStmt.setInt(1, jobId);
+            try (ResultSet jobRs = jobStmt.executeQuery()) {
+                if (!jobRs.next() || jobRs.getInt(1) == 0) {
+                    System.out.println("Invalid Job ID. Employee creation aborted.");
+                    return; // Abort if the job ID is invalid
+                }
+            }
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "SQL Exception occurred while validating Job ID", e);
+            return;
+        }
 
         System.out.print("Enter Email: ");
         String email = scanner.nextLine();
 
         System.out.print("Enter Phone Number: ");
         String phoneNumber = scanner.nextLine();
-
-        System.out.print("Enter Hotel ID: ");
-        int hotelId = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
 
         System.out.print("Enter Salary: ");
         double salary = scanner.nextDouble();
@@ -76,21 +110,19 @@ public class EmployeeManagement {
         System.out.print("Enter End Date (YYYY-MM-DD) or leave blank: ");
         String endDate = scanner.nextLine();
 
-        // Queries for validation and salary range
-        String validateJobQuery = "SELECT MIN_SALARY, MAX_SALARY FROM jobs WHERE JOB_ID = ?";
-        String validateHotelQuery = "SELECT COUNT(*) FROM hotel WHERE HOTEL_ID = ?";
+        // Query for salary range validation
+        String salaryRangeQuery = "SELECT MIN_SALARY, MAX_SALARY FROM jobs WHERE JOB_ID = ?";
         String insertEmployeeQuery = "INSERT INTO employee (EMPLOYEE_NAME, JOB_ID, EMAIL, CONTACT_NO, HOTEL_ID, SALARY, HIRE_DATE, END_DATE) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection con = DatabaseConnection.getConnection();
-             PreparedStatement jobStmt = con.prepareStatement(validateJobQuery);
-             PreparedStatement hotelStmt = con.prepareStatement(validateHotelQuery);
+             PreparedStatement salaryStmt = con.prepareStatement(salaryRangeQuery);
              PreparedStatement insertStmt = con.prepareStatement(insertEmployeeQuery)) {
 
-            // Validate JOB_ID
-            jobStmt.setInt(1, jobId);
+            // Validate JOB_ID salary range
+            salaryStmt.setInt(1, jobId);
             double minSalary, maxSalary;
-            try (ResultSet jobRs = jobStmt.executeQuery()) {
+            try (ResultSet jobRs = salaryStmt.executeQuery()) {
                 if (jobRs.next()) {
                     minSalary = jobRs.getDouble("MIN_SALARY");
                     maxSalary = jobRs.getDouble("MAX_SALARY");
@@ -102,15 +134,6 @@ public class EmployeeManagement {
                     }
                 } else {
                     System.out.println("Invalid Job ID. Employee creation aborted.");
-                    return;
-                }
-            }
-
-            // Validate HOTEL_ID
-            hotelStmt.setInt(1, hotelId);
-            try (ResultSet hotelRs = hotelStmt.executeQuery()) {
-                if (hotelRs.next() && hotelRs.getInt(1) == 0) {
-                    System.out.println("Invalid Hotel ID. Employee creation aborted.");
                     return;
                 }
             }
@@ -141,6 +164,7 @@ public class EmployeeManagement {
         }
     }
 
+
     public static void updateEmployeeDetails() {
         Scanner scanner = new Scanner(System.in);
 
@@ -148,22 +172,71 @@ public class EmployeeManagement {
         int employeeId = scanner.nextInt();
         scanner.nextLine(); // Consume newline
 
-        System.out.print("Enter New Employee Name: ");
-        String employeeName = scanner.nextLine();
+        // Validate Employee Existence
+        String validateEmployeeQuery = "SELECT COUNT(*) FROM employee WHERE EMPLOYEE_ID = ?";
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement employeeStmt = con.prepareStatement(validateEmployeeQuery)) {
 
+            employeeStmt.setInt(1, employeeId);
+            try (ResultSet employeeRs = employeeStmt.executeQuery()) {
+                if (!employeeRs.next() || employeeRs.getInt(1) == 0) {
+                    System.out.println("Employee does not exist. Update aborted.");
+                    return; // Abort if the employee does not exist
+                }
+            }
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "SQL Exception occurred while validating Employee ID", e);
+            return;
+        }
+
+        // Validate Hotel ID
+        System.out.print("Enter New Hotel ID: ");
+        int hotelId = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+
+        String validateHotelQuery = "SELECT COUNT(*) FROM hotel WHERE HOTEL_ID = ?";
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement hotelStmt = con.prepareStatement(validateHotelQuery)) {
+
+            hotelStmt.setInt(1, hotelId);
+            try (ResultSet hotelRs = hotelStmt.executeQuery()) {
+                if (!hotelRs.next() || hotelRs.getInt(1) == 0) {
+                    System.out.println("Invalid Hotel ID. Update aborted.");
+                    return; // Abort if the hotel ID is invalid
+                }
+            }
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "SQL Exception occurred while validating Hotel ID", e);
+            return;
+        }
+
+        // Validate Job ID
         System.out.print("Enter New Job ID: ");
         int jobId = scanner.nextInt();
         scanner.nextLine(); // Consume newline
 
+        String validateJobQuery = "SELECT COUNT(*) FROM jobs WHERE JOB_ID = ?";
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement jobStmt = con.prepareStatement(validateJobQuery)) {
+
+            jobStmt.setInt(1, jobId);
+            try (ResultSet jobRs = jobStmt.executeQuery()) {
+                if (!jobRs.next() || jobRs.getInt(1) == 0) {
+                    System.out.println("Invalid Job ID. Update aborted.");
+                    return; // Abort if the job ID is invalid
+                }
+            }
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "SQL Exception occurred while validating Job ID", e);
+            return;
+        }
+
+        // Read other details
         System.out.print("Enter New Email: ");
         String email = scanner.nextLine();
 
         System.out.print("Enter New Phone Number: ");
         String phoneNumber = scanner.nextLine();
-
-        System.out.print("Enter New Hotel ID: ");
-        int hotelId = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
 
         System.out.print("Enter New Salary: ");
         double salary = scanner.nextDouble();
@@ -176,25 +249,24 @@ public class EmployeeManagement {
         String endDate = scanner.nextLine();
 
         String query = "UPDATE employee " +
-                "SET EMPLOYEE_NAME = ?, JOB_ID = ?, EMAIL = ?, CONTACT_NO = ?, HOTEL_ID = ?, SALARY = ?, HIRE_DATE = ?, END_DATE = ? " +
+                "SET JOB_ID = ?, EMAIL = ?, CONTACT_NO = ?, HOTEL_ID = ?, SALARY = ?, HIRE_DATE = ?, END_DATE = ? " +
                 "WHERE EMPLOYEE_ID = ?";
 
         try (Connection con = DatabaseConnection.getConnection();
              PreparedStatement pstmt = con.prepareStatement(query)) {
 
-            pstmt.setString(1, employeeName);
-            pstmt.setInt(2, jobId);
-            pstmt.setString(3, email);
-            pstmt.setString(4, phoneNumber);
-            pstmt.setInt(5, hotelId);
-            pstmt.setDouble(6, salary);
-            pstmt.setDate(7, Date.valueOf(hireDate));
+            pstmt.setInt(1, jobId);
+            pstmt.setString(2, email);
+            pstmt.setString(3, phoneNumber);
+            pstmt.setInt(4, hotelId);
+            pstmt.setDouble(5, salary);
+            pstmt.setDate(6, Date.valueOf(hireDate));
             if (endDate.isEmpty()) {
-                pstmt.setNull(8, Types.DATE);
+                pstmt.setNull(7, Types.DATE);
             } else {
-                pstmt.setDate(8, Date.valueOf(endDate));
+                pstmt.setDate(7, Date.valueOf(endDate));
             }
-            pstmt.setInt(9, employeeId);
+            pstmt.setInt(8, employeeId);
 
             int rowsAffected = pstmt.executeUpdate();
             if (rowsAffected > 0) {

@@ -18,7 +18,7 @@ public class HotelDBDriver {
         PaymentManagementView paymentManagement = new PaymentManagementView(scanner);
 
         // Main menu loop
-        System.out.println("Welcome to the Hotel Management !");
+        System.out.print("Welcome to the Hotel Management!");
         while (true) {
             System.out.println("\nMain Menu:");
             System.out.println("1. Hotel Management");

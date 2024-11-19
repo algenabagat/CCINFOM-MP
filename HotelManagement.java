@@ -103,7 +103,9 @@ public class HotelManagement {
         Scanner scanner = new Scanner(System.in);
 
         try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(
+             PreparedStatement checkHotelStmt = connection.prepareStatement(
+                     "SELECT 1 FROM hotel WHERE HOTEL_ID = ?");
+             PreparedStatement updateHotelStmt = connection.prepareStatement(
                      "UPDATE hotel SET HOTEL_NAME = ?, HOTEL_EMAIL = ?, CONTACT_NO = ? WHERE HOTEL_ID = ?")) {
 
             // Prompt the user for input
@@ -111,6 +113,16 @@ public class HotelManagement {
             int hotelId = scanner.nextInt();
             scanner.nextLine(); // Consume the newline
 
+            // Check if the hotel ID exists
+            checkHotelStmt.setInt(1, hotelId);
+            try (ResultSet rs = checkHotelStmt.executeQuery()) {
+                if (!rs.next()) {
+                    System.out.println("No hotel found with the given ID.");
+                    return;  // Exit the method if no hotel is found
+                }
+            }
+
+            // If the hotel exists, prompt for the new details
             System.out.print("Enter new Hotel Name: ");
             String name = scanner.nextLine();
 
@@ -120,23 +132,24 @@ public class HotelManagement {
             System.out.print("Enter new Hotel Contact Number: ");
             String contact = scanner.nextLine();
 
-            // Prepare the SQL statement
-            preparedStatement.setString(1, name);
-            preparedStatement.setString(2, email);
-            preparedStatement.setString(3, contact);
-            preparedStatement.setInt(4, hotelId);
+            // Prepare the SQL statement for updating
+            updateHotelStmt.setString(1, name);
+            updateHotelStmt.setString(2, email);
+            updateHotelStmt.setString(3, contact);
+            updateHotelStmt.setInt(4, hotelId);
 
             // Execute the update
-            int rowsAffected = preparedStatement.executeUpdate();
+            int rowsAffected = updateHotelStmt.executeUpdate();
             if (rowsAffected > 0) {
                 System.out.println("Hotel details updated successfully.");
             } else {
-                System.out.println("No hotel found with the given ID.");
+                System.out.println("Failed to update hotel details.");
             }
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "SQL Exception occurred while updating hotel details", e);
         }
     }
+
 
     public static void deleteHotel() {
         Scanner scanner = new Scanner(System.in);
