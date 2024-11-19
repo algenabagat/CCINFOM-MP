@@ -124,32 +124,66 @@ public class ReservationManagement {
     public static void updateReservation() {
         Scanner scanner = new Scanner(System.in);
 
+        // Ask for Reservation ID
         System.out.print("Enter Reservation ID: ");
         int reservationId = scanner.nextInt();
         scanner.nextLine(); // Consume newline
 
+        // Ask for Room ID before the dates
+        System.out.print("Enter Room ID for the reservation: ");
+        int roomId = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+
+        // Check for overlapping reservations before proceeding
         System.out.print("Enter New Check-in Date (YYYY-MM-DD): ");
         String newCheckinDate = scanner.nextLine();
 
         System.out.print("Enter New Check-out Date (YYYY-MM-DD): ");
         String newCheckoutDate = scanner.nextLine();
 
-        System.out.print("Enter New Reservation Status: ");
-        String newReservationStatus = scanner.nextLine();
+        // Query to check for overlapping reservations in the same room
+        String checkOverlapQuery = "SELECT COUNT(*) AS overlap_count FROM reservation " +
+                "WHERE ROOM_ID = ? AND RESERVATION_ID != ? AND " +
+                "((CHECKIN_DATE <= ? AND CHECKOUT_DATE > ?) OR " +
+                "(CHECKIN_DATE < ? AND CHECKOUT_DATE >= ?))";
 
-        String query = "UPDATE reservation " +
+        // SQL query to update the reservation
+        String updateQuery = "UPDATE reservation " +
                 "SET CHECKIN_DATE = ?, CHECKOUT_DATE = ?, RESERVATION_STATUS = ? " +
                 "WHERE RESERVATION_ID = ?";
 
         try (Connection con = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = con.prepareStatement(query)) {
+             PreparedStatement checkStmt = con.prepareStatement(checkOverlapQuery);
+             PreparedStatement updateStmt = con.prepareStatement(updateQuery)) {
 
-            pstmt.setDate(1, Date.valueOf(newCheckinDate));
-            pstmt.setDate(2, Date.valueOf(newCheckoutDate));
-            pstmt.setString(3, newReservationStatus);
-            pstmt.setInt(4, reservationId);
+            // Check for overlapping reservations for the selected room
+            checkStmt.setInt(1, roomId);
+            checkStmt.setInt(2, reservationId); // Exclude the current reservation from the overlap check
+            checkStmt.setDate(3, Date.valueOf(newCheckinDate));
+            checkStmt.setDate(4, Date.valueOf(newCheckinDate));
+            checkStmt.setDate(5, Date.valueOf(newCheckoutDate));
+            checkStmt.setDate(6, Date.valueOf(newCheckoutDate));
 
-            int rowsAffected = pstmt.executeUpdate();
+            ResultSet rs = checkStmt.executeQuery();
+            rs.next();
+            int overlapCount = rs.getInt("overlap_count");
+
+            if (overlapCount > 0) {
+                System.out.println("Cannot update reservation! The selected room already has a reservation on the selected dates.");
+                return;
+            }
+
+            // Ask for Reservation Status after confirming availability
+            System.out.print("Enter New Reservation Status: ");
+            String newReservationStatus = scanner.nextLine();
+
+            // Proceed to update the reservation
+            updateStmt.setDate(1, Date.valueOf(newCheckinDate));
+            updateStmt.setDate(2, Date.valueOf(newCheckoutDate));
+            updateStmt.setString(3, newReservationStatus); // Set the new reservation status
+            updateStmt.setInt(4, reservationId);
+
+            int rowsAffected = updateStmt.executeUpdate();
             if (rowsAffected > 0) {
                 System.out.println("Reservation updated successfully.");
             } else {
