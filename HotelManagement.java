@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 public class HotelManagement {
     private static final Logger logger = Logger.getLogger(HotelManagement.class.getName());
 
-    public static void createHotel(){
+    public static void createHotel() {
         Scanner scanner = new Scanner(System.in);
 
         System.out.print("Enter Hotel Name: ");
@@ -22,17 +22,20 @@ public class HotelManagement {
         int locationId = scanner.nextInt();
         scanner.nextLine(); // Consume newline
 
+        // Insert query for adding a hotel
         String query = "INSERT INTO hotel (HOTEL_NAME, HOTEL_EMAIL, CONTACT_NO, LOCATION_ID) " +
                 "VALUES (?, ?, ?, ?)";
 
         try (Connection con = DatabaseConnection.getConnection();
              PreparedStatement pstmt = con.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 
+            // Set parameters for the query
             pstmt.setString(1, hotelName);
             pstmt.setString(2, hotelEmail);
             pstmt.setString(3, contactNo);
             pstmt.setInt(4, locationId);
 
+            // Execute the query
             int rowsAffected = pstmt.executeUpdate();
             if (rowsAffected > 0) {
                 try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
@@ -45,6 +48,8 @@ public class HotelManagement {
                 System.out.println("Failed to create hotel.");
             }
 
+        } catch (SQLIntegrityConstraintViolationException e) {
+            System.out.println("Invalid Location ID. Hotel creation aborted.");
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "SQL Exception occurred while creating hotel", e);
         }

@@ -29,6 +29,7 @@ public class HotelManagementView {
                break;
             case 2:
                this.updateHotelDetails();
+               HotelManagement.viewHotelDetails();
                HotelManagement.updateHotelDetails();
                break;
             case 3:
