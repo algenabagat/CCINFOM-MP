@@ -80,27 +80,60 @@ public class EmployeeManagement {
         System.out.print("Enter End Date (YYYY-MM-DD) or leave blank: ");
         String endDate = scanner.nextLine();
 
-        // Insert query with Job ID, assuming the DB will handle Employee ID auto-increment
-        String query = "INSERT INTO employee (EMPLOYEE_NAME, JOB_ID, EMAIL, CONTACT_NO, HOTEL_ID, SALARY, HIRE_DATE, END_DATE) " +
+        // Queries for validation and salary range
+        String validateJobQuery = "SELECT MIN_SALARY, MAX_SALARY FROM jobs WHERE JOB_ID = ?";
+        String validateHotelQuery = "SELECT COUNT(*) FROM hotel WHERE HOTEL_ID = ?";
+        String insertEmployeeQuery = "INSERT INTO employee (EMPLOYEE_NAME, JOB_ID, EMAIL, CONTACT_NO, HOTEL_ID, SALARY, HIRE_DATE, END_DATE) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection con = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = con.prepareStatement(query)) {
+             PreparedStatement jobStmt = con.prepareStatement(validateJobQuery);
+             PreparedStatement hotelStmt = con.prepareStatement(validateHotelQuery);
+             PreparedStatement insertStmt = con.prepareStatement(insertEmployeeQuery)) {
 
-            pstmt.setString(1, employeeName);
-            pstmt.setInt(2, jobId);
-            pstmt.setString(3, email);
-            pstmt.setString(4, phoneNumber);
-            pstmt.setInt(5, hotelId);
-            pstmt.setDouble(6, salary);
-            pstmt.setDate(7, Date.valueOf(hireDate));
-            if (endDate.isEmpty()) {
-                pstmt.setNull(8, Types.DATE);
-            } else {
-                pstmt.setDate(8, Date.valueOf(endDate));
+            // Validate JOB_ID
+            jobStmt.setInt(1, jobId);
+            double minSalary, maxSalary;
+            try (ResultSet jobRs = jobStmt.executeQuery()) {
+                if (jobRs.next()) {
+                    minSalary = jobRs.getDouble("MIN_SALARY");
+                    maxSalary = jobRs.getDouble("MAX_SALARY");
+
+                    // Check salary range
+                    if (salary < minSalary || salary > maxSalary) {
+                        System.out.printf("Salary must be between %.2f and %.2f for this job.%n", minSalary, maxSalary);
+                        return;
+                    }
+                } else {
+                    System.out.println("Invalid Job ID. Employee creation aborted.");
+                    return;
+                }
             }
 
-            int rowsAffected = pstmt.executeUpdate();
+            // Validate HOTEL_ID
+            hotelStmt.setInt(1, hotelId);
+            try (ResultSet hotelRs = hotelStmt.executeQuery()) {
+                if (hotelRs.next() && hotelRs.getInt(1) == 0) {
+                    System.out.println("Invalid Hotel ID. Employee creation aborted.");
+                    return;
+                }
+            }
+
+            // Insert Employee
+            insertStmt.setString(1, employeeName);
+            insertStmt.setInt(2, jobId);
+            insertStmt.setString(3, email);
+            insertStmt.setString(4, phoneNumber);
+            insertStmt.setInt(5, hotelId);
+            insertStmt.setDouble(6, salary);
+            insertStmt.setDate(7, Date.valueOf(hireDate));
+            if (endDate.isEmpty()) {
+                insertStmt.setNull(8, Types.DATE);
+            } else {
+                insertStmt.setDate(8, Date.valueOf(endDate));
+            }
+
+            int rowsAffected = insertStmt.executeUpdate();
             if (rowsAffected > 0) {
                 System.out.println("Employee added successfully.");
             } else {
@@ -111,7 +144,6 @@ public class EmployeeManagement {
             logger.log(Level.SEVERE, "SQL Exception occurred while adding employee", e);
         }
     }
-
 
     public static void updateEmployeeDetails() {
         Scanner scanner = new Scanner(System.in);
