@@ -9,63 +9,109 @@ public class ReservationManagement {
     public static void addReservation() {
         Scanner scanner = new Scanner(System.in);
 
-        System.out.print("Enter Guest ID: ");
-        int guestId = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
+        try (Connection con = DatabaseConnection.getConnection()) {
+            // Step 1: Display available hotels
+            HotelManagement.viewHotelDetails();
 
-        System.out.print("Enter Room ID: ");
-        int roomId = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
+            // Step 2: Prompt the user to select a hotel ID
+            System.out.print("Enter Hotel ID: ");
+            int selectedHotelId = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
 
-        System.out.print("Enter Check-in Date (YYYY-MM-DD): ");
-        String checkinDate = scanner.nextLine();
+            // Step 3: Fetch and display rooms for the selected hotel in a detailed table format
+            String fetchRoomsQuery = "SELECT ROOM_ID, ROOM_NO FROM rooms WHERE HOTEL_ID = ?";
+            try (PreparedStatement roomStmt = con.prepareStatement(fetchRoomsQuery)) {
+                roomStmt.setInt(1, selectedHotelId);
+                ResultSet roomRs = roomStmt.executeQuery();
 
-        System.out.print("Enter Check-out Date (YYYY-MM-DD): ");
-        String checkoutDate = scanner.nextLine();
+                System.out.println("+----------+----------+");
+                System.out.printf("| %-8s | %-8s |\n", "ROOM_ID", "ROOM_NO");
+                System.out.println("+----------+----------+");
 
-        // Set reservation status to "Confirmed" automatically
-        String reservationStatus = "Confirmed";
+                boolean roomsAvailable = false;
+                while (roomRs.next()) {
+                    roomsAvailable = true;
+                    int roomId = roomRs.getInt("ROOM_ID");
+                    int roomNo = roomRs.getInt("ROOM_NO");
+                    System.out.printf("| %-8d | %-8d |\n", roomId, roomNo);
+                    System.out.println("+----------+----------+");
+                }
 
-        String checkOverlapQuery = "SELECT COUNT(*) AS overlap_count FROM reservation " +
-                "WHERE ROOM_ID = ? AND " +
-                "((CHECKIN_DATE <= ? AND CHECKOUT_DATE > ?) OR " +
-                "(CHECKIN_DATE < ? AND CHECKOUT_DATE >= ?))";
-
-        String insertQuery = "INSERT INTO reservation (GUEST_ID, ROOM_ID, CHECKIN_DATE, CHECKOUT_DATE, RESERVATION_STATUS) " +
-                "VALUES (?, ?, ?, ?, ?)";
-
-        try (Connection con = DatabaseConnection.getConnection();
-             PreparedStatement checkStmt = con.prepareStatement(checkOverlapQuery);
-             PreparedStatement insertStmt = con.prepareStatement(insertQuery)) {
-
-            // Check for overlapping reservations
-            checkStmt.setInt(1, roomId);
-            checkStmt.setDate(2, Date.valueOf(checkinDate));
-            checkStmt.setDate(3, Date.valueOf(checkinDate));
-            checkStmt.setDate(4, Date.valueOf(checkoutDate));
-            checkStmt.setDate(5, Date.valueOf(checkoutDate));
-
-            ResultSet rs = checkStmt.executeQuery();
-            rs.next();
-            int overlapCount = rs.getInt("overlap_count");
-
-            if (overlapCount > 0) {
-                System.out.println("Cannot add reservation! The selected room already has a reservation on the selected dates.");
-                return;
+                if (!roomsAvailable) {
+                    System.out.println("No rooms available for the selected hotel.");
+                    return;
+                }
             }
 
-            // Insert the reservation
-            insertStmt.setInt(1, guestId);
-            insertStmt.setInt(2, roomId);
-            insertStmt.setDate(3, Date.valueOf(checkinDate));
-            insertStmt.setDate(4, Date.valueOf(checkoutDate));
-            insertStmt.setString(5, reservationStatus);
+            // Step 4: Prompt the user to enter a room ID and validate it
+            System.out.print("Enter Room ID: ");
+            int selectedRoomId = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
 
-            int rowsAffected = insertStmt.executeUpdate();
-            if (rowsAffected > 0) {
-                System.out.println("Reservation added successfully.");
-            } else {
-                System.out.println("Failed to add reservation.");
+            String validateRoomQuery = "SELECT COUNT(*) AS room_count FROM rooms WHERE ROOM_ID = ? AND HOTEL_ID = ?";
+            try (PreparedStatement validateRoomStmt = con.prepareStatement(validateRoomQuery)) {
+                validateRoomStmt.setInt(1, selectedRoomId);
+                validateRoomStmt.setInt(2, selectedHotelId);
+                ResultSet validateRoomRs = validateRoomStmt.executeQuery();
+
+                validateRoomRs.next();
+                int roomCount = validateRoomRs.getInt("room_count");
+                if (roomCount == 0) {
+                    System.out.println("Invalid Room ID! Aborting reservation.");
+                    return;
+                }
+            }
+
+            // Step 5: Collect reservation details
+            System.out.print("Enter Guest ID: ");
+            int guestId = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+
+            System.out.print("Enter Check-in Date (YYYY-MM-DD): ");
+            String checkinDate = scanner.nextLine();
+
+            System.out.print("Enter Check-out Date (YYYY-MM-DD): ");
+            String checkoutDate = scanner.nextLine();
+
+            // Step 6: Check for overlapping reservations
+            String checkOverlapQuery = "SELECT COUNT(*) AS overlap_count FROM reservation " +
+                    "WHERE ROOM_ID = ? AND " +
+                    "((CHECKIN_DATE <= ? AND CHECKOUT_DATE > ?) OR " +
+                    "(CHECKIN_DATE < ? AND CHECKOUT_DATE >= ?))";
+
+            try (PreparedStatement checkStmt = con.prepareStatement(checkOverlapQuery)) {
+                checkStmt.setInt(1, selectedRoomId);
+                checkStmt.setDate(2, Date.valueOf(checkinDate));
+                checkStmt.setDate(3, Date.valueOf(checkinDate));
+                checkStmt.setDate(4, Date.valueOf(checkoutDate));
+                checkStmt.setDate(5, Date.valueOf(checkoutDate));
+
+                ResultSet overlapRs = checkStmt.executeQuery();
+                overlapRs.next();
+                int overlapCount = overlapRs.getInt("overlap_count");
+
+                if (overlapCount > 0) {
+                    System.out.println("Cannot add reservation! The selected room already has a reservation on the selected dates.");
+                    return;
+                }
+            }
+
+            // Step 7: Insert the reservation
+            String insertQuery = "INSERT INTO reservation (GUEST_ID, ROOM_ID, CHECKIN_DATE, CHECKOUT_DATE, RESERVATION_STATUS) " +
+                    "VALUES (?, ?, ?, ?, ?)";
+            try (PreparedStatement insertStmt = con.prepareStatement(insertQuery)) {
+                insertStmt.setInt(1, guestId);
+                insertStmt.setInt(2, selectedRoomId);
+                insertStmt.setDate(3, Date.valueOf(checkinDate));
+                insertStmt.setDate(4, Date.valueOf(checkoutDate));
+                insertStmt.setString(5, "Confirmed");
+
+                int rowsAffected = insertStmt.executeUpdate();
+                if (rowsAffected > 0) {
+                    System.out.println("Reservation added successfully.");
+                } else {
+                    System.out.println("Failed to add reservation.");
+                }
             }
 
         } catch (SQLException e) {
@@ -73,11 +119,10 @@ public class ReservationManagement {
         }
     }
 
-
     public static void viewReservations() {
         String query = "SELECT " +
                 "r.RESERVATION_ID, r.GUEST_ID, g.GUEST_NAME, r.CHECKIN_DATE, r.CHECKOUT_DATE, " +
-                "r.RESERVATION_STATUS, h.HOTEL_NAME, ro.ROOM_NO " +  // Added ROOM_NO
+                "r.RESERVATION_STATUS, h.HOTEL_NAME, ro.ROOM_NO " +
                 "FROM reservation r " +
                 "JOIN guest g ON r.GUEST_ID = g.GUEST_ID " +  // Join with guest table
                 "JOIN rooms ro ON r.ROOM_ID = ro.ROOM_ID " +  // Join with rooms table using ROOM_ID
