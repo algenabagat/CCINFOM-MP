@@ -22,81 +22,41 @@ public class ReservationManagement {
             }
 
             // Step 3: Fetch and display rooms for the selected hotel in a detailed table format
-            String fetchRoomsQuery = "SELECT ROOM_ID, ROOM_NO FROM rooms WHERE HOTEL_ID = ?";
-            try (PreparedStatement roomStmt = con.prepareStatement(fetchRoomsQuery)) {
-                roomStmt.setInt(1, selectedHotelId);
-                ResultSet roomRs = roomStmt.executeQuery();
-
-                System.out.println("+----------+----------+");
-                System.out.printf("| %-8s | %-8s |\n", "ROOM_ID", "ROOM_NO");
-                System.out.println("+----------+----------+");
-
-                boolean roomsAvailable = false;
-                while (roomRs.next()) {
-                    roomsAvailable = true;
-                    int roomId = roomRs.getInt("ROOM_ID");
-                    int roomNo = roomRs.getInt("ROOM_NO");
-                    System.out.printf("| %-8d | %-8d |\n", roomId, roomNo);
-                    System.out.println("+----------+----------+");
-                }
-
-                if (!roomsAvailable) {
-                    System.out.println("No rooms available for the selected hotel.");
-                    return;
-                }
-            }
+            displayRooms(con, selectedHotelId);
 
             // Step 4: Prompt the user to enter a room ID and validate it
-            System.out.print("Enter Room ID: ");
-            int selectedRoomId = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
+            int selectedRoomId = InputValidator.getValidIntInput("Enter Room ID: ");
 
-            String validateRoomQuery = "SELECT COUNT(*) AS room_count FROM rooms WHERE ROOM_ID = ? AND HOTEL_ID = ?";
-            try (PreparedStatement validateRoomStmt = con.prepareStatement(validateRoomQuery)) {
-                validateRoomStmt.setInt(1, selectedRoomId);
-                validateRoomStmt.setInt(2, selectedHotelId);
-                ResultSet validateRoomRs = validateRoomStmt.executeQuery();
-
-                validateRoomRs.next();
-                int roomCount = validateRoomRs.getInt("room_count");
-                if (roomCount == 0) {
-                    System.out.println("Invalid Room ID! Aborting reservation.");
-                    return;
-                }
+            // Validate room
+            if (!InputValidator.validateRoom(con, selectedRoomId, selectedHotelId)) {
+                System.out.println("Reservation aborted due to invalid Room ID.");
+                return; // Abort reservation if the room is invalid
             }
 
             // Step 5: Collect reservation details
-            System.out.print("Enter Guest ID: ");
-            int guestId = scanner.nextInt();
+            int guestId = InputValidator.getValidIntInput("Enter Guest ID: ");
             scanner.nextLine(); // Consume newline
 
             System.out.print("Enter Check-in Date (YYYY-MM-DD): ");
             String checkinDate = scanner.nextLine();
 
+            if (!InputValidator.validateDateFormat(checkinDate)) {
+                System.out.println("Invalid date format. Please use the format YYYY-MM-DD.");
+                return; // Abort reservation if the date format is invalid
+            }
+
             System.out.print("Enter Check-out Date (YYYY-MM-DD): ");
             String checkoutDate = scanner.nextLine();
 
+            if (!InputValidator.validateDateFormat(checkoutDate)) {
+                System.out.println("Invalid date format. Please use the format YYYY-MM-DD.");
+                return; // Abort reservation if the date format is invalid
+            }
+
             // Step 6: Check for overlapping reservations
-            String checkOverlapQuery = "SELECT COUNT(*) AS overlap_count FROM reservation " +
-                    "WHERE ROOM_ID = ? AND " +
-                    "((CHECKIN_DATE <= ? AND CHECKOUT_DATE > ?) OR " +
-                    "(CHECKIN_DATE < ? AND CHECKOUT_DATE >= ?))";
-
-            try (PreparedStatement checkStmt = con.prepareStatement(checkOverlapQuery)) {
-                checkStmt.setInt(1, selectedRoomId);
-                checkStmt.setDate(2, Date.valueOf(checkinDate));
-                checkStmt.setDate(3, Date.valueOf(checkinDate));
-                checkStmt.setDate(4, Date.valueOf(checkoutDate));
-                checkStmt.setDate(5, Date.valueOf(checkoutDate));
-
-                ResultSet overlapRs = checkStmt.executeQuery();
-                overlapRs.next();
-                int overlapCount = overlapRs.getInt("overlap_count");
-
-                if (overlapCount > 0) {
-                    System.out.println("Cannot add reservation! The selected room already has a reservation on the selected dates.");
-                    return;
-                }
+            if (!InputValidator.checkReservationOverlap(selectedRoomId, checkinDate, checkoutDate)) {
+                System.out.println("Cannot add reservation! The selected room is already booked for the selected dates.");
+                return; // Abort reservation if there is an overlap
             }
 
             // Step 7: Insert the reservation
@@ -172,81 +132,93 @@ public class ReservationManagement {
         Scanner scanner = new Scanner(System.in);
 
         // Ask for Reservation ID
-        System.out.print("Enter Reservation ID: ");
-        int reservationId = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
+        int reservationId = InputValidator.getValidIntInput("Enter Reservation ID to update: ");
 
-        // Ask for Room ID before the dates
-        System.out.print("Enter Room ID for the reservation: ");
-        int roomId = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
+        // Establishing database connection inside try-catch block
+        try (Connection con = DatabaseConnection.getConnection()) {
 
-        // Check for overlapping reservations before proceeding
-        System.out.print("Enter New Check-in Date (YYYY-MM-DD): ");
-        String newCheckinDate = scanner.nextLine();
-
-        System.out.print("Enter New Check-out Date (YYYY-MM-DD): ");
-        String newCheckoutDate = scanner.nextLine();
-
-        // Query to check for overlapping reservations in the same room
-        String checkOverlapQuery = "SELECT COUNT(*) AS overlap_count FROM reservation " +
-                "WHERE ROOM_ID = ? AND RESERVATION_ID != ? AND " +
-                "((CHECKIN_DATE <= ? AND CHECKOUT_DATE > ?) OR " +
-                "(CHECKIN_DATE < ? AND CHECKOUT_DATE >= ?))";
-
-        // SQL query to update the reservation
-        String updateQuery = "UPDATE reservation " +
-                "SET CHECKIN_DATE = ?, CHECKOUT_DATE = ?, RESERVATION_STATUS = ? " +
-                "WHERE RESERVATION_ID = ?";
-
-        try (Connection con = DatabaseConnection.getConnection();
-             PreparedStatement checkStmt = con.prepareStatement(checkOverlapQuery);
-             PreparedStatement updateStmt = con.prepareStatement(updateQuery)) {
-
-            // Check for overlapping reservations for the selected room
-            checkStmt.setInt(1, roomId);
-            checkStmt.setInt(2, reservationId); // Exclude the current reservation from the overlap check
-            checkStmt.setDate(3, Date.valueOf(newCheckinDate));
-            checkStmt.setDate(4, Date.valueOf(newCheckinDate));
-            checkStmt.setDate(5, Date.valueOf(newCheckoutDate));
-            checkStmt.setDate(6, Date.valueOf(newCheckoutDate));
-
-            ResultSet rs = checkStmt.executeQuery();
-            rs.next();
-            int overlapCount = rs.getInt("overlap_count");
-
-            if (overlapCount > 0) {
-                System.out.println("Cannot update reservation! The selected room already has a reservation on the selected dates.");
-                return;
+            // Validate Reservation ID
+            if (!InputValidator.validateReservationId(con, reservationId)) {
+                System.out.println("Invalid Reservation ID. Aborting update.");
+                return; // Abort if the reservation ID is invalid
             }
 
-            // Ask for Reservation Status after confirming availability
-            System.out.print("Enter New Reservation Status: ");
-            String newReservationStatus = scanner.nextLine();
+            // Get the Hotel ID for the reservation
+            int hotelId = getHotelIdFromReservation(con, reservationId);
+            if (hotelId == -1) {
+                System.out.println("Hotel ID not found for the reservation. Aborting update.");
+                return; // Abort if hotel ID is not found
+            }
+
+            // Ask for Room ID before the dates
+            int roomId = InputValidator.getValidIntInput("Enter Room ID: ");
+
+            // Validate the Room ID for the given Hotel ID
+            if (!InputValidator.validateRoom(con, roomId, hotelId)) {
+                System.out.println("Invalid Room ID for the selected hotel. Aborting update.");
+                return; // Abort if the room ID is invalid for the hotel
+            }
+
+            // Check for overlapping reservations before proceeding
+            System.out.print("Enter New Check-in Date (YYYY-MM-DD): ");
+            String newCheckinDate = scanner.nextLine();
+
+            if (!InputValidator.validateDateFormat(newCheckinDate)) {
+                System.out.println("Invalid date format. Please use the format YYYY-MM-DD.");
+                return; // Abort reservation if the date format is invalid
+            }
+
+            System.out.print("Enter New Check-out Date (YYYY-MM-DD): ");
+            String newCheckoutDate = scanner.nextLine();
+
+            if (!InputValidator.validateDateFormat(newCheckoutDate)) {
+                System.out.println("Invalid date format. Please use the format YYYY-MM-DD.");
+                return; // Abort reservation if the date format is invalid
+            }
+
+            // Call checkReservationOverlap to check for overlapping reservations
+            boolean isOverlapping = InputValidator.checkReservationOverlap(roomId, newCheckinDate, newCheckoutDate);
+            if (isOverlapping) {
+                System.out.println("Cannot update reservation! The selected room already has a reservation on the selected dates.");
+                return; // Abort if there is an overlap
+            }
+
+            // SQL query to update the reservation (without the reservation status)
+            String updateQuery = "UPDATE reservation " +
+                    "SET CHECKIN_DATE = ?, CHECKOUT_DATE = ? " +
+                    "WHERE RESERVATION_ID = ?";
 
             // Proceed to update the reservation
-            updateStmt.setDate(1, Date.valueOf(newCheckinDate));
-            updateStmt.setDate(2, Date.valueOf(newCheckoutDate));
-            updateStmt.setString(3, newReservationStatus); // Set the new reservation status
-            updateStmt.setInt(4, reservationId);
+            try (PreparedStatement updateStmt = con.prepareStatement(updateQuery)) {
+                updateStmt.setDate(1, Date.valueOf(newCheckinDate));
+                updateStmt.setDate(2, Date.valueOf(newCheckoutDate));
+                updateStmt.setInt(3, reservationId);
 
-            int rowsAffected = updateStmt.executeUpdate();
-            if (rowsAffected > 0) {
-                System.out.println("Reservation updated successfully.");
-            } else {
-                System.out.println("Failed to update reservation.");
+                int rowsAffected = updateStmt.executeUpdate();
+                if (rowsAffected > 0) {
+                    System.out.println("Reservation updated successfully.");
+                } else {
+                    System.out.println("Failed to update reservation.");
+                }
+
+            } catch (SQLException e) {
+                // Log and handle exceptions that may arise during database operations
+                logger.log(Level.SEVERE, "SQL Exception occurred while updating reservation", e);
+                System.out.println("An error occurred while processing the request.");
             }
 
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "SQL Exception occurred while updating reservation", e);
+            // Handle exceptions that occur when establishing the connection
+            logger.log(Level.SEVERE, "Connection error while updating reservation", e);
+            System.out.println("Unable to establish a connection to the database.");
         }
     }
 
     public static void cancelReservation() {
         Scanner scanner = new Scanner(System.in);
 
-        System.out.print("Enter Reservation ID to cancel: ");
-        int reservationId = scanner.nextInt();
+        // Ask for Reservation ID
+        int reservationId = InputValidator.getValidIntInput("Enter Reservation ID to cancel: ");
         scanner.nextLine(); // Consume newline
 
         String query = "DELETE FROM reservation WHERE RESERVATION_ID = ?";
@@ -267,4 +239,47 @@ public class ReservationManagement {
             logger.log(Level.SEVERE, "SQL Exception occurred while cancelling reservation", e);
         }
     }
+
+    public static void displayRooms(Connection con, int hotelId) {
+        String fetchRoomsQuery = "SELECT ROOM_ID, ROOM_NO FROM rooms WHERE HOTEL_ID = ?";
+
+        try (PreparedStatement roomStmt = con.prepareStatement(fetchRoomsQuery)) {
+            roomStmt.setInt(1, hotelId);
+            ResultSet roomRs = roomStmt.executeQuery();
+
+            System.out.println("+----------+----------+");
+            System.out.printf("| %-8s | %-8s |\n", "ROOM_ID", "ROOM_NO");
+            System.out.println("+----------+----------+");
+
+            boolean roomsAvailable = false;
+            while (roomRs.next()) {
+                roomsAvailable = true;
+                int roomId = roomRs.getInt("ROOM_ID");
+                int roomNo = roomRs.getInt("ROOM_NO");
+                System.out.printf("| %-8d | %-8d |\n", roomId, roomNo);
+                System.out.println("+----------+----------+");
+            }
+
+            if (!roomsAvailable) {
+                System.out.println("No rooms available for the selected hotel.");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error fetching rooms: " + e.getMessage());
+        }
+    }
+
+    // Helper method to get Hotel ID from Reservation ID
+    private static int getHotelIdFromReservation(Connection con, int reservationId) throws SQLException {
+        String getHotelQuery = "SELECT HOTEL_ID FROM reservation WHERE RESERVATION_ID = ?";
+        try (PreparedStatement stmt = con.prepareStatement(getHotelQuery)) {
+            stmt.setInt(1, reservationId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("HOTEL_ID");
+            } else {
+                return -1; // If no hotel found for the reservation
+            }
+        }
+    }
+
 }

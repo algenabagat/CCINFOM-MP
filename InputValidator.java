@@ -177,4 +177,48 @@ public class InputValidator {
         }
     }
 
+    public static boolean validateRoom(Connection con, int selectedRoomId, int selectedHotelId) {
+        String validateRoomQuery = "SELECT COUNT(*) AS room_count FROM rooms WHERE ROOM_ID = ? AND HOTEL_ID = ?";
+
+        try (PreparedStatement validateRoomStmt = con.prepareStatement(validateRoomQuery)) {
+            validateRoomStmt.setInt(1, selectedRoomId);
+            validateRoomStmt.setInt(2, selectedHotelId);
+            ResultSet validateRoomRs = validateRoomStmt.executeQuery();
+
+            validateRoomRs.next();
+            int roomCount = validateRoomRs.getInt("room_count");
+
+            if (roomCount == 0) {
+                System.out.println("Invalid Room ID! Aborting reservation.");
+                return false;  // Room is not valid
+            }
+        } catch (SQLException e) {
+            System.out.println("Error validating room: " + e.getMessage());
+            return false;  // Return false if there is a database error
+        }
+
+        return true;  // Room is valid
+    }
+
+    public static boolean validateReservationId(Connection con, int reservationId) {
+        String validateReservationQuery = "SELECT COUNT(*) AS reservation_count FROM reservation WHERE RESERVATION_ID = ?";
+
+        try (PreparedStatement stmt = con.prepareStatement(validateReservationQuery)) {
+            stmt.setInt(1, reservationId);
+            ResultSet rs = stmt.executeQuery();
+
+            rs.next();
+            int reservationCount = rs.getInt("reservation_count");
+
+            if (reservationCount > 0) {
+                return true; // Reservation ID is valid
+            } else {
+                System.out.println("Invalid Reservation ID! No such reservation found.");
+                return false; // Reservation ID is invalid
+            }
+        } catch (SQLException e) {
+            System.out.println("Error validating Reservation ID: " + e.getMessage());
+            return false; // Return false in case of an error
+        }
+    }
 }
