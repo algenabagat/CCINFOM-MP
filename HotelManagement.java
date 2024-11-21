@@ -18,6 +18,7 @@ public class HotelManagement {
         System.out.print("Enter Contact Number: ");
         String contactNo = scanner.nextLine();
 
+        showLocations();    // Display locations to choose from
         System.out.print("Enter Location ID: ");
         int locationId = scanner.nextInt();
         scanner.nextLine(); // Consume newline
@@ -250,6 +251,44 @@ public class HotelManagement {
             } catch (SQLException e) {
                 logger.log(Level.SEVERE, "SQL Exception occurred while closing resources", e);
             }
+        }
+    }
+
+    public static void showLocations() {
+        try (Connection con = DatabaseConnection.getConnection()) {
+            // SQL query to fetch location details
+            String query = "SELECT LOCATION_ID, STREET_ADDRESS, CITY, POSTAL_CODE, STATE_PROVINCE, COUNTRY_ID FROM location";
+
+            try (PreparedStatement stmt = con.prepareStatement(query);
+                 ResultSet rs = stmt.executeQuery()) {
+
+                // Print the header of the table
+                System.out.println("+--------------+------------------------------+-----------------+--------------+-------------------------+-------------+");
+                System.out.printf("| %-12s | %-28s | %-15s | %-12s | %-23s | %-11s |\n",
+                        "LOCATION_ID", "STREET_ADDRESS", "CITY", "POSTAL_CODE", "STATE_PROVINCE", "COUNTRY_ID");
+                System.out.println("+--------------+------------------------------+-----------------+--------------+-------------------------+-------------+");
+
+                // Loop through the result set and print each location record
+                while (rs.next()) {
+                    int locationId = rs.getInt("LOCATION_ID");
+                    String streetAddress = rs.getString("STREET_ADDRESS");
+                    String city = rs.getString("CITY");
+                    String postalCode = rs.getString("POSTAL_CODE");
+                    String stateProvince = rs.getString("STATE_PROVINCE");
+                    int countryId = rs.getInt("COUNTRY_ID");
+
+                    // Print the location details
+                    System.out.printf("| %-12d | %-28s | %-15s | %-12s | %-23s | %-11d |\n",
+                            locationId, streetAddress, city, postalCode, stateProvince, countryId);
+                    System.out.println("+--------------+------------------------------+-----------------+--------------+-------------------------+-------------+");
+                }
+
+            } catch (SQLException e) {
+                logger.log(Level.SEVERE, "SQL Exception occurred while fetching location details", e);
+            }
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Database connection error", e);
         }
     }
 }
