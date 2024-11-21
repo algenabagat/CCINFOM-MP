@@ -19,9 +19,9 @@ public class HotelManagement {
         String contactNo = scanner.nextLine();
 
         showLocations();    // Display locations to choose from
-        System.out.print("Enter Location ID: ");
-        int locationId = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
+
+        int locationId = InputValidator.getValidIntInput("Enter Location ID: ");
+
 
         // Insert query for adding a hotel
         String query = "INSERT INTO hotel (HOTEL_NAME, HOTEL_EMAIL, CONTACT_NO, LOCATION_ID) " +
@@ -110,9 +110,7 @@ public class HotelManagement {
                      "UPDATE hotel SET HOTEL_NAME = ?, HOTEL_EMAIL = ?, CONTACT_NO = ? WHERE HOTEL_ID = ?")) {
 
             // Prompt the user for input
-            System.out.print("Enter Hotel ID to update: ");
-            int hotelId = scanner.nextInt();
-            scanner.nextLine(); // Consume the newline
+            int hotelId = InputValidator.getValidIntInput("Enter Hotel ID to delete: ");
 
             // Check if the hotel ID exists
             checkHotelStmt.setInt(1, hotelId);
@@ -153,8 +151,6 @@ public class HotelManagement {
 
 
     public static void deleteHotel() {
-        Scanner scanner = new Scanner(System.in);
-
         try (Connection connection = DatabaseConnection.getConnection();
              PreparedStatement checkHotelStatement = connection.prepareStatement(
                      "SELECT COUNT(*) FROM hotel WHERE HOTEL_ID = ?");
@@ -166,9 +162,7 @@ public class HotelManagement {
                      "DELETE FROM hotel WHERE HOTEL_ID = ?")) {
 
             // Prompt the user for input
-            System.out.print("Enter Hotel ID to delete: ");
-            int hotelId = scanner.nextInt();
-            scanner.nextLine(); // Consume the newline
+            int hotelId = InputValidator.getValidIntInput("Enter Hotel ID to delete: ");
 
             // Check if the hotel exists
             checkHotelStatement.setInt(1, hotelId);

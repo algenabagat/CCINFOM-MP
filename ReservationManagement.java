@@ -14,9 +14,12 @@ public class ReservationManagement {
             HotelManagement.viewHotelDetails();
 
             // Step 2: Prompt the user to select a hotel ID
-            System.out.print("Enter Hotel ID: ");
-            int selectedHotelId = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
+            int selectedHotelId = InputValidator.getValidIntInput("Enter Hotel ID: ");
+
+            if (!InputValidator.validateHotel(selectedHotelId)) {
+                System.out.println("Reservation aborted due to invalid Hotel ID.");
+                return; // Abort if the hotel ID is invalid
+            }
 
             // Step 3: Fetch and display rooms for the selected hotel in a detailed table format
             String fetchRoomsQuery = "SELECT ROOM_ID, ROOM_NO FROM rooms WHERE HOTEL_ID = ?";

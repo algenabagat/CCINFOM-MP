@@ -52,9 +52,7 @@ public class EmployeeManagement {
 
         HotelManagement.viewHotelDetails(); // Display hotel details for reference
         // Validate Hotel ID using the validateHotel function
-        System.out.print("Enter Hotel ID: ");
-        int hotelId = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
+        int hotelId = InputValidator.getValidIntInput("Enter Hotel ID: ");
 
         if (!InputValidator.validateHotel(hotelId)) {
             System.out.println("Employee creation aborted due to invalid Hotel ID.");
@@ -66,9 +64,7 @@ public class EmployeeManagement {
 
         showJobs(); // Display job details for reference
         // Validate Job ID using the validateJob function
-        System.out.print("Enter Job ID: ");
-        int jobId = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
+        int jobId = InputValidator.getValidIntInput("Enter Job ID: ");
 
         if (!InputValidator.validateJob(jobId)) {
             System.out.println("Employee creation aborted due to invalid Job ID.");
@@ -81,10 +77,8 @@ public class EmployeeManagement {
         System.out.print("Enter Phone Number: ");
         String phoneNumber = scanner.nextLine();
 
-        System.out.print("Enter Salary: ");
-        double salary = scanner.nextDouble();
-        scanner.nextLine(); // Consume newline
-
+        // Validate the salary
+        double salary = InputValidator.getValidDoubleInput("Enter Salary: ");
         if (!InputValidator.validateSalary(jobId, salary)) {
             System.out.println("Invalid salary. Employee creation aborted.");
             return; // Abort if salary is invalid
@@ -132,9 +126,7 @@ public class EmployeeManagement {
     public static void updateEmployeeDetails() {
         Scanner scanner = new Scanner(System.in);
 
-        System.out.print("Enter Employee ID to update: ");
-        int employeeId = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
+        int employeeId = InputValidator.getValidIntInput("Enter Employee ID to update: ");
 
         // Validate Employee Existence
         if (!InputValidator.validateEmployee(employeeId)) {
@@ -143,9 +135,9 @@ public class EmployeeManagement {
         }
 
         HotelManagement.viewHotelDetails(); // Display hotel details for reference
-        System.out.print("Enter New Hotel ID: ");   // Validate Hotel ID
-        int hotelId = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
+
+        // Validate Hotel ID using the validateHotel function
+        int hotelId = InputValidator.getValidIntInput("Enter New Hotel ID: ");
 
         if (!InputValidator.validateHotel(hotelId)) {
             System.out.println("Invalid Hotel ID. Update aborted.");
@@ -153,9 +145,9 @@ public class EmployeeManagement {
         }
 
         showJobs(); // Display job details for reference
-        System.out.print("Enter New Job ID: "); // Validate Job ID
-        int jobId = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
+
+        // Validate Job ID using the validateJob function
+        int jobId = InputValidator.getValidIntInput("Enter New Job ID: ");
 
         if (!InputValidator.validateJob(jobId)) {
             System.out.println("Invalid Job ID. Employee creation aborted.");
@@ -170,16 +162,14 @@ public class EmployeeManagement {
         System.out.print("Enter New Phone Number: ");
         String phoneNumber = scanner.nextLine();
 
-        System.out.print("Enter New Salary: ");
-        double salary = scanner.nextDouble();
-        scanner.nextLine(); // Consume newline
+        // Validate the salary
+        double salary = InputValidator.getValidDoubleInput("Enter New Salary: ");
 
         // Call validateSalary to ensure the salary is within valid range
         if (!InputValidator.validateSalary(jobId, salary)) {
             System.out.println("Invalid salary. Employee creation aborted.");
             return; // Abort if salary is invalid
         }
-
 
         System.out.print("Enter New Hire Date (YYYY-MM-DD): ");
         String hireDate = scanner.nextLine();
@@ -229,11 +219,7 @@ public class EmployeeManagement {
     }
 
     public static void deleteEmployee() {
-        Scanner scanner = new Scanner(System.in);
-
-        System.out.print("Enter Employee ID to delete: ");
-        int employeeId = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
+        int employeeId = InputValidator.getValidIntInput("Enter Employee ID to delete: ");
 
         String query = "DELETE FROM employee WHERE EMPLOYEE_ID = ?";
 

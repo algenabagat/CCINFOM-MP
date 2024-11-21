@@ -1,6 +1,7 @@
 import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -111,4 +112,69 @@ public class InputValidator {
         }
         return true; // Valid hotel ID
     }
+
+    // Method to get a valid integer from the user
+    public static int getValidIntInput(String prompt) {
+        Scanner scanner = new Scanner(System.in);
+        int input = -1;
+        boolean validInput = false;
+
+        // Keep prompting until a valid integer is entered
+        while (!validInput) {
+            System.out.print(prompt);
+            if (scanner.hasNextInt()) {
+                input = scanner.nextInt();
+                validInput = true; // Valid integer input
+            } else {
+                System.out.println("Invalid input. Please enter a valid integer.");
+                scanner.next(); // Consume the invalid input
+            }
+        }
+        return input; // Return the valid integer
+    }
+
+    public static double getValidDoubleInput(String prompt) {
+        Scanner scanner = new Scanner(System.in);
+        double input = -1;
+        boolean valid = false;
+
+        while (!valid) {
+            System.out.print(prompt);
+            if (scanner.hasNextDouble()) {
+                input = scanner.nextDouble();
+                valid = true;
+            } else {
+                System.out.println("Invalid input. Please enter a valid number (e.g., 10.50).");
+                scanner.nextLine(); // Consume the invalid input
+            }
+        }
+        return input;
+    }
+
+    // Validates that the room is not already booked for the selected dates
+    public static boolean checkReservationOverlap(int roomId, String checkinDate, String checkoutDate) {
+        String checkOverlapQuery = "SELECT COUNT(*) AS overlap_count FROM reservation " +
+                "WHERE ROOM_ID = ? AND " +
+                "((CHECKIN_DATE <= ? AND CHECKOUT_DATE > ?) OR " +
+                "(CHECKIN_DATE < ? AND CHECKOUT_DATE >= ?))";
+
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement checkStmt = con.prepareStatement(checkOverlapQuery)) {
+            checkStmt.setInt(1, roomId);
+            checkStmt.setDate(2, Date.valueOf(checkinDate));
+            checkStmt.setDate(3, Date.valueOf(checkinDate));
+            checkStmt.setDate(4, Date.valueOf(checkoutDate));
+            checkStmt.setDate(5, Date.valueOf(checkoutDate));
+
+            ResultSet overlapRs = checkStmt.executeQuery();
+            overlapRs.next();
+            int overlapCount = overlapRs.getInt("overlap_count");
+
+            return overlapCount == 0; // True if no overlap
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "SQL Exception occurred while checking reservation overlap", e);
+            return false;
+        }
+    }
+
 }
