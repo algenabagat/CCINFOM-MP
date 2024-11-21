@@ -24,6 +24,7 @@ public class PaymentManagementView {
             switch (choice) {
                 case 1:
                     processPayment();
+                    PaymentManagement.addPayment();
                     break;
                 case 2:
                     viewPaymentRecords();
