@@ -224,7 +224,7 @@ public class ReportsManagement {
     // Helper function to get the start and end dates for the selected time period
     public static String[] getStartAndEndDates() {
         String period = getTimePeriod();
-        String startDate = "", endDate = "";
+        String startDate, endDate;
 
         switch (period) {
             case "daily":
