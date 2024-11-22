@@ -221,4 +221,10 @@ public class InputValidator {
             return false; // Return false in case of an error
         }
     }
+
+    // Function to get user input as a String
+    public static String getInput() {
+        Scanner scanner = new Scanner(System.in);
+        return scanner.nextLine().trim();
+    }
 }

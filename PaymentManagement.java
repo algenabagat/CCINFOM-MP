@@ -7,113 +7,129 @@ public class PaymentManagement {
     private static final Logger logger = Logger.getLogger(PaymentManagement.class.getName());
 
     public static void addPayment() {
-        // Ask the user for the Reservation ID
+        ReservationManagement.viewReservations();
         int reservationId = InputValidator.getValidIntInput("Enter Reservation ID to make payment: ");
 
-        // Ask the user for the Discount ID
-        int discountId = InputValidator.getValidIntInput("Enter Discount ID: ");
-
-        // Ask the user for the Payment Method ID
-        int paymentMethodId = InputValidator.getValidIntInput("Enter Payment Method ID: ");
-
-        // Establishing database connection inside try-catch block
         try (Connection con = DatabaseConnection.getConnection()) {
 
-            // SQL query to get the ROOM_ID from the reservation for the given RESERVATION_ID
-            String roomIdQuery = "SELECT ROOM_ID FROM reservation WHERE RESERVATION_ID = ?";
+            // Check if the reservation exists and its status
+            String checkReservationQuery = "SELECT RESERVATION_STATUS FROM reservation WHERE RESERVATION_ID = ?";
+            try (PreparedStatement checkReservationStmt = con.prepareStatement(checkReservationQuery)) {
+                checkReservationStmt.setInt(1, reservationId);
+                ResultSet rs = checkReservationStmt.executeQuery();
 
-            try (PreparedStatement roomStmt = con.prepareStatement(roomIdQuery)) {
-                roomStmt.setInt(1, reservationId);
-                ResultSet roomRs = roomStmt.executeQuery();
-
-                if (!roomRs.next()) {
+                if (!rs.next()) {
                     System.out.println("Reservation ID not found. Aborting payment.");
-                    return; // Abort if reservation ID is not found
+                    return;
                 }
 
-                // Get the ROOM_ID from the reservation table
-                int roomId = roomRs.getInt("ROOM_ID");
+                String reservationStatus = rs.getString("RESERVATION_STATUS");
+                if ("Paid".equalsIgnoreCase(reservationStatus)) {
+                    System.out.println("This reservation is already paid. No further payment is allowed.");
+                    return;
+                }
+            }
 
-                // SQL query to get the TYPE_ID for the given ROOM_ID from the rooms table
-                String roomTypeQuery = "SELECT TYPE_ID FROM rooms WHERE ROOM_ID = ?";
-                try (PreparedStatement roomTypeStmt = con.prepareStatement(roomTypeQuery)) {
-                    roomTypeStmt.setInt(1, roomId);
-                    ResultSet roomTypeRs = roomTypeStmt.executeQuery();
+            // Ask for Discount ID (allow blank)
+            showDiscount();
+            System.out.print("Enter Discount ID (or leave blank for no discount): ");
+            String discountInput = InputValidator.getInput();
+            Integer discountId = (discountInput.isEmpty()) ? null : Integer.parseInt(discountInput);
 
-                    if (!roomTypeRs.next()) {
-                        System.out.println("Room type not found. Aborting payment.");
-                        return; // Abort if room type is not found
+            if (discountId != null) {
+                // Validate Discount ID
+                String discountValidationQuery = "SELECT 1 FROM discount WHERE DISCOUNT_ID = ?";
+                try (PreparedStatement discountStmt = con.prepareStatement(discountValidationQuery)) {
+                    discountStmt.setInt(1, discountId);
+                    ResultSet discountRs = discountStmt.executeQuery();
+                    if (!discountRs.next()) {
+                        System.out.println("Invalid Discount ID. Aborting payment.");
+                        return;
                     }
+                }
+            }
 
-                    // Get the TYPE_ID from the rooms table
-                    int typeId = roomTypeRs.getInt("TYPE_ID");
+            // Ask for Payment Method ID
+            showPaymentMethods();
+            int paymentMethodId = InputValidator.getValidIntInput("Enter Payment Method ID: ");
 
-                    // SQL query to get the ROOM_PRICE for the given TYPE_ID from the roomtype table
-                    String roomPriceQuery = "SELECT ROOM_PRICE FROM roomtype WHERE ROOMTYPE_ID = ?";
-                    try (PreparedStatement priceStmt = con.prepareStatement(roomPriceQuery)) {
-                        priceStmt.setInt(1, typeId);
-                        ResultSet priceRs = priceStmt.executeQuery();
+            // Validate Payment Method ID
+            String paymentMethodValidationQuery = "SELECT 1 FROM payment_method WHERE PAYMENT_METHOD_ID = ?";
+            try (PreparedStatement paymentMethodStmt = con.prepareStatement(paymentMethodValidationQuery)) {
+                paymentMethodStmt.setInt(1, paymentMethodId);
+                ResultSet paymentMethodRs = paymentMethodStmt.executeQuery();
+                if (!paymentMethodRs.next()) {
+                    System.out.println("Invalid Payment Method ID. Aborting payment.");
+                    return;
+                }
+            }
 
-                        if (!priceRs.next()) {
-                            System.out.println("Room price not found. Aborting payment.");
-                            return; // Abort if room price is not found
+            // Fetch ROOM_ID and calculate price
+            String fetchRoomQuery = "SELECT r.ROOM_ID, rt.ROOM_PRICE FROM reservation r "
+                    + "JOIN rooms ro ON r.ROOM_ID = ro.ROOM_ID "
+                    + "JOIN roomtype rt ON ro.TYPE_ID = rt.ROOMTYPE_ID WHERE r.RESERVATION_ID = ?";
+            try (PreparedStatement fetchRoomStmt = con.prepareStatement(fetchRoomQuery)) {
+                fetchRoomStmt.setInt(1, reservationId);
+                ResultSet roomRs = fetchRoomStmt.executeQuery();
+
+                if (!roomRs.next()) {
+                    System.out.println("Room details for the reservation not found. Aborting payment.");
+                    return;
+                }
+
+                double roomPrice = roomRs.getDouble("ROOM_PRICE");
+
+                // Apply discount if applicable
+                double discountPercentage = 0;
+                if (discountId != null) {
+                    String discountQuery = "SELECT DISCOUNT_PERCENTAGE FROM discount WHERE DISCOUNT_ID = ?";
+                    try (PreparedStatement discountStmt = con.prepareStatement(discountQuery)) {
+                        discountStmt.setInt(1, discountId);
+                        ResultSet discountRs = discountStmt.executeQuery();
+                        if (discountRs.next()) {
+                            discountPercentage = discountRs.getDouble("DISCOUNT_PERCENTAGE");
                         }
+                    }
+                }
 
-                        // Get the room price
-                        double roomPrice = priceRs.getDouble("ROOM_PRICE");
+                double finalAmount = roomPrice * (1 - discountPercentage / 100);
 
-                        // SQL query to get the discount percentage
-                        String discountQuery = "SELECT DISCOUNT_PERCENTAGE FROM discount WHERE DISCOUNT_ID = ?";
-                        try (PreparedStatement discountStmt = con.prepareStatement(discountQuery)) {
-                            discountStmt.setInt(1, discountId);
-                            ResultSet discountRs = discountStmt.executeQuery();
+                // Insert payment record
+                String paymentQuery = "INSERT INTO payment (RESERVATION_ID, PAYMENT_DATE, AMOUNT, DISCOUNT_ID, PAYMENT_METHOD_ID) "
+                        + "VALUES (?, CURDATE(), ?, ?, ?)";
+                try (PreparedStatement paymentStmt = con.prepareStatement(paymentQuery)) {
+                    paymentStmt.setInt(1, reservationId);
+                    paymentStmt.setDouble(2, finalAmount);
+                    if (discountId != null) {
+                        paymentStmt.setInt(3, discountId);
+                    } else {
+                        paymentStmt.setNull(3, java.sql.Types.INTEGER);
+                    }
+                    paymentStmt.setInt(4, paymentMethodId);
 
-                            if (!discountRs.next()) {
-                                System.out.println("Discount ID not found. Aborting payment.");
-                                return; // Abort if discount ID is not found
-                            }
+                    int rowsAffected = paymentStmt.executeUpdate();
+                    if (rowsAffected > 0) {
+                        System.out.println("Payment added successfully.");
 
-                            // Get the discount percentage
-                            double discountPercentage = discountRs.getDouble("DISCOUNT_PERCENTAGE");
-
-                            // Calculate the amount after applying the discount
-                            double finalAmount = roomPrice * (1 - discountPercentage);
-
-                            // SQL query to insert the payment record
-                            String paymentQuery = "INSERT INTO payment (RESERVATION_ID, PAYMENT_DATE, AMOUNT, DISCOUNT_ID, PAYMENT_METHOD_ID) " +
-                                    "VALUES (?, CURDATE(), ?, ?, ?)";
-                            try (PreparedStatement paymentStmt = con.prepareStatement(paymentQuery)) {
-                                paymentStmt.setInt(1, reservationId);
-                                paymentStmt.setDouble(2, finalAmount);
-                                paymentStmt.setInt(3, discountId);
-                                paymentStmt.setInt(4, paymentMethodId);
-
-                                // Execute the payment insertion
-                                int rowsAffected = paymentStmt.executeUpdate();
-                                if (rowsAffected > 0) {
-                                    System.out.println("Payment added successfully.");
-
-                                    // Update the reservation status to 'Paid'
-                                    String updateStatusQuery = "UPDATE reservation SET RESERVATION_STATUS = 'Paid' WHERE RESERVATION_ID = ?";
-                                    try (PreparedStatement updateStmt = con.prepareStatement(updateStatusQuery)) {
-                                        updateStmt.setInt(1, reservationId);
-                                        updateStmt.executeUpdate();
-                                        System.out.println("Reservation status updated to 'Paid'.");
-                                    }
-                                } else {
-                                    System.out.println("Failed to add payment.");
-                                }
-                            }
+                        // Update reservation status to 'Paid'
+                        String updateStatusQuery = "UPDATE reservation SET RESERVATION_STATUS = 'Paid' WHERE RESERVATION_ID = ?";
+                        try (PreparedStatement updateStmt = con.prepareStatement(updateStatusQuery)) {
+                            updateStmt.setInt(1, reservationId);
+                            updateStmt.executeUpdate();
+                            System.out.println("Reservation status updated to 'Paid'.");
                         }
+                    } else {
+                        System.out.println("Failed to add payment.");
                     }
                 }
             }
         } catch (SQLException e) {
-            // Log and handle exceptions that may arise during database operations
             logger.log(Level.SEVERE, "SQL Exception occurred while adding payment", e);
             System.out.println("An error occurred while processing the payment.");
         }
     }
+
+
 
     public static void viewPayments() {
         String query = "SELECT " +
@@ -156,36 +172,43 @@ public class PaymentManagement {
     }
 
     public static void addDiscount() {
-        Scanner scanner = new Scanner(System.in);
+        // Require user to input a non-empty Discount Name
+        String discountName;
+        while (true) {
+            System.out.print("Enter Discount Name: ");
+            discountName = InputValidator.getInput();
+            if (!discountName.isEmpty()) {
+                break;
+            }
+            System.out.println("Error: Discount name cannot be empty. Please try again.");
+        }
 
-        System.out.print("Enter Discount Name: ");
-        String discountName = scanner.nextLine();
-
-        double discountPercentage = InputValidator.getValidDoubleInput("Enter Discount Percentage (e.g., 0.10 for 10%): "); // Validate discount percentage
+        // Validate discount percentage input
+        double discountPercentage = InputValidator.getValidDoubleInput("Enter Discount Percentage (e.g., 0.10 for 10%): ");
         if (discountPercentage < 0 || discountPercentage > 1) {
             System.out.println("Error: Discount percentage must be between 0 and 1.");
             return;
         }
 
-        String insertQuery = "INSERT INTO discount (DISCOUNT_NAME, DISCOUNT_PERCENTAGE) VALUES (?, ?)";
+        // Add the discount to the database
+        try (Connection con = DatabaseConnection.getConnection()) {
+            String query = "INSERT INTO discount (DISCOUNT_NAME, DISCOUNT_PERCENTAGE) VALUES (?, ?)";
+            try (PreparedStatement stmt = con.prepareStatement(query)) {
+                stmt.setString(1, discountName);
+                stmt.setDouble(2, discountPercentage);
+                int rowsAffected = stmt.executeUpdate();
 
-        try (Connection con = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = con.prepareStatement(insertQuery)) {
-
-            pstmt.setString(1, discountName);
-            pstmt.setDouble(2, discountPercentage);
-
-            int rowsAffected = pstmt.executeUpdate();
-            if (rowsAffected > 0) {
-                System.out.println("Discount added successfully.");
-            } else {
-                System.out.println("Failed to add discount.");
+                if (rowsAffected > 0) {
+                    System.out.println("Discount added successfully.");
+                } else {
+                    System.out.println("Failed to add discount.");
+                }
             }
-
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "SQL Exception occurred while adding discount", e);
+            System.err.println("SQL Exception occurred while adding discount: " + e.getMessage());
         }
     }
+
 
     public static void showDiscount() {
         String query = "SELECT * FROM discount";
@@ -315,4 +338,47 @@ public class PaymentManagement {
             logger.log(Level.SEVERE, "SQL Exception occurred while updating the discount", e);
         }
     }
+
+    public static void showPaymentMethods() {
+        // Establish database connection inside a try-catch block
+        try (Connection con = DatabaseConnection.getConnection()) {
+
+            // SQL query to fetch all payment methods
+            String paymentMethodQuery = "SELECT PAYMENT_METHOD_ID, METHOD_NAME FROM payment_method";
+
+            try (PreparedStatement stmt = con.prepareStatement(paymentMethodQuery);
+                 ResultSet rs = stmt.executeQuery()) {
+
+                // Check if there are payment methods to display
+                if (!rs.isBeforeFirst()) {
+                    System.out.println("No payment methods found.");
+                    return; // Exit if no payment methods exist
+                }
+
+                // Display table header with borders
+                System.out.println("+--------------------+--------------------+");
+                System.out.printf("| %-18s | %-18s |%n", "Payment Method ID", "Method Name");
+                System.out.println("+--------------------+--------------------+");
+
+                // Loop through the result set and display each payment method
+                while (rs.next()) {
+                    int paymentMethodId = rs.getInt("PAYMENT_METHOD_ID");
+                    String methodName = rs.getString("METHOD_NAME");
+
+                    // Print each row in tabular format
+                    System.out.printf("| %-18d | %-18s |%n", paymentMethodId, methodName);
+                    System.out.println("+--------------------+--------------------+");
+                }
+            } catch (SQLException e) {
+                // Handle SQL exceptions during query execution
+                logger.log(Level.SEVERE, "SQL Exception occurred while fetching payment methods", e);
+                System.out.println("An error occurred while retrieving the payment methods.");
+            }
+        } catch (SQLException e) {
+            // Handle exceptions during database connection
+            logger.log(Level.SEVERE, "SQL Exception occurred while connecting to the database", e);
+            System.out.println("An error occurred while connecting to the database.");
+        }
+    }
+
 }

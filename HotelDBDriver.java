@@ -48,6 +48,9 @@ public class HotelDBDriver {
                     case 4:
                         paymentManagement.showMenu();
                         break;
+                    case 5:
+                        // reportManagement.showMenu();
+                        break;
                     case 0:
                         System.out.println("Exiting the system. Goodbye!");
                         scanner.close(); // Close the scanner before exiting
