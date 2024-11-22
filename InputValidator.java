@@ -227,4 +227,10 @@ public class InputValidator {
         Scanner scanner = new Scanner(System.in);
         return scanner.nextLine().trim();
     }
+
+    public static String getValidStringInput(String prompt) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print(prompt);
+        return scanner.nextLine();
+    }
 }

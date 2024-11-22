@@ -23,9 +23,11 @@ public class ReportManagementView {
             switch (choice) {
                 case 1:
                     generateHotelRevenueReport();
+                    ReportsManagement.generateHotelRevenueReport();
                     break;
                 case 2:
                     generateEmployeeHiringReport();
+                    ReportsManagement.generateEmployeeHiringReport();
                     break;
                 case 3:
                     generateReservationsReport();
