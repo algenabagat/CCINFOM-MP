@@ -16,6 +16,7 @@ public class HotelDBDriver {
         EmployeeManagementView employeeManagement = new EmployeeManagementView(scanner);
         ReservationManagementView reservationManagement = new ReservationManagementView(scanner);
         PaymentManagementView paymentManagement = new PaymentManagementView(scanner);
+        ReportManagementView reportManagement = new ReportManagementView(scanner);
 
         // Main menu loop
         System.out.print("Welcome to the Hotel Management!");
@@ -25,8 +26,8 @@ public class HotelDBDriver {
             System.out.println("2. Employee Management");
             System.out.println("3. Reservation Management");
             System.out.println("4. Payment Management");
+            System.out.println("5. Reports");
             System.out.println("0. Exit");
-
 
             System.out.print("Choose an option: ");
             String input = scanner.nextLine();  // Read the whole line
@@ -49,7 +50,7 @@ public class HotelDBDriver {
                         paymentManagement.showMenu();
                         break;
                     case 5:
-                        // reportManagement.showMenu();
+                        reportManagement.showMenu();
                         break;
                     case 0:
                         System.out.println("Exiting the system. Goodbye!");
