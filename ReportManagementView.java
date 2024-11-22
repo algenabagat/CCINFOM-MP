@@ -31,6 +31,7 @@ public class ReportManagementView {
                     break;
                 case 3:
                     generateReservationsReport();
+                    ReportsManagement.generateReservationsReport();
                     break;
                 case 4:
                     generatePaymentsReport();

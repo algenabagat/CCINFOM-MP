@@ -63,6 +63,7 @@ public class ReportsManagement {
 
     // Method to generate employee hiring report for a specific hotel
     public static void generateEmployeeHiringReport() {
+        HotelManagement.viewHotelDetails();  // Display hotel details to get the hotel ID
         // Input the HOTEL_ID using InputValidator
         int hotelId = InputValidator.getValidIntInput("Enter the Hotel ID to see employee details: ");
 
@@ -122,6 +123,76 @@ public class ReportsManagement {
         }
     }
 
+    // Method to generate reservations report
+    public static void generateReservationsReport() {
+        // Get the start and end dates based on the selected period
+        String[] dateRange = getStartAndEndDates();
+        String startDate = dateRange[0];
+        String endDate = dateRange[1];
+        String period = dateRange[2];
+
+        // Ask the user to input hotel ID
+        HotelManagement.viewHotelDetails();  // Display hotel details to get the hotel ID
+        int hotelId = InputValidator.getValidIntInput("Enter the Hotel ID to generate the reservations report: ");
+
+        // Validate the hotel ID
+        if (!InputValidator.validateHotel(hotelId)) {
+            System.out.println("Invalid Hotel ID. Report generation aborted.");
+            return; // Exit the method if the hotel ID is invalid
+        }
+
+        System.out.println("Generating Reservations Report for " + period + "...");
+
+        // SQL query to get reservations based on hotel ID and time period, replacing GUEST_ID with GUEST_NAME
+        String sql = "SELECT r.RESERVATION_ID, g.GUEST_NAME, r.CHECKIN_DATE, r.CHECKOUT_DATE, r.RESERVATION_STATUS, ro.ROOM_NO " +
+                "FROM reservation r " +
+                "JOIN guest g ON r.GUEST_ID = g.GUEST_ID " +
+                "JOIN rooms ro ON r.ROOM_ID = ro.ROOM_ID " +
+                "WHERE ro.HOTEL_ID = ? AND r.CHECKIN_DATE BETWEEN ? AND ? " +
+                "ORDER BY r.CHECKIN_DATE";
+
+        // Print the table border
+        System.out.println("+----------------+-----------------------------+------------+------------+------------------+----------+");
+        System.out.printf("| %-14s | %-27s | %-10s | %-10s | %-16s | %-8s |\n",
+                "Reservation ID", "Guest Name", "Check-in", "Check-out", "Reservation Status", "Room No");
+        System.out.println("+----------------+-----------------------------+------------+------------+------------------+----------+");
+
+        // Establish database connection
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement stmt = con.prepareStatement(sql)) {
+
+            // Set the parameters for the query
+            stmt.setInt(1, hotelId);  // Hotel ID
+            stmt.setString(2, startDate);  // Start date
+            stmt.setString(3, endDate);  // End date
+
+            // Execute the query and process the result
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                int reservationId = rs.getInt("RESERVATION_ID");
+                String guestName = rs.getString("GUEST_NAME");
+                String checkinDate = rs.getString("CHECKIN_DATE");  // Retrieving as String
+                String checkoutDate = rs.getString("CHECKOUT_DATE");  // Retrieving as String
+                String reservationStatus = rs.getString("RESERVATION_STATUS");
+                int roomNo = rs.getInt("ROOM_NO");
+
+                // Print each row of data in the table
+                System.out.printf("| %-14d | %-27s | %-10s | %-10s | %-16s | %-8d |\n",
+                        reservationId, guestName, checkinDate, checkoutDate, reservationStatus, roomNo);
+            }
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error while generating the report: ", e);
+        }
+
+        // Print the table border at the end
+        System.out.println("+----------------+-----------------------------+------------+------------+------------------+----------+");
+    }
+
+    // Method to generate payments report
+    public static void generatePaymentsReport() {
+        System.out.println("Generating Payments Report...");
+    }
 
     // Ask the user to choose daily, monthly, or yearly report
     public static String getTimePeriod() {
@@ -178,15 +249,4 @@ public class ReportsManagement {
 
         return new String[] { startDate, endDate, period };
     }
-
-    // Method to generate reservations report
-    public static void generateReservationsReport() {
-        System.out.println("Generating Reservations Report...");
-    }
-
-    // Method to generate payments report
-    public static void generatePaymentsReport() {
-        System.out.println("Generating Payments Report...");
-    }
-
 }
