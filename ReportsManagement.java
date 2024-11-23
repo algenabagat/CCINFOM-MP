@@ -191,7 +191,68 @@ public class ReportsManagement {
 
     // Method to generate payments report
     public static void generatePaymentsReport() {
-        System.out.println("Generating Payments Report...");
+        // Ask the user for the report period
+        String[] dateRange = getStartAndEndDates();
+        String startDate = dateRange[0];
+        String endDate = dateRange[1];
+        String period = dateRange[2];
+
+        // Ask the user for the Hotel ID
+        HotelManagement.viewHotelDetails(); // Display available hotels
+        int hotelId = InputValidator.getValidIntInput("Enter the Hotel ID to generate the payments report: ");
+
+        // Validate the hotel ID
+        if (!InputValidator.validateHotel(hotelId)) {
+            System.out.println("Invalid Hotel ID. Report generation aborted.");
+            return; // Exit if the hotel ID is invalid
+        }
+
+        System.out.println("Generating Payments Report for " + period + "...");
+
+        // SQL query to fetch payments for the given time period and hotel
+        String sql = "SELECT p.PAYMENT_ID, g.GUEST_NAME, p.PAYMENT_DATE, p.AMOUNT, " +
+                "IFNULL(d.DISCOUNT_NAME, 'None') AS DISCOUNT_NAME " +
+                "FROM payment p " +
+                "JOIN reservation r ON p.RESERVATION_ID = r.RESERVATION_ID " +
+                "JOIN guest g ON r.GUEST_ID = g.GUEST_ID " +
+                "LEFT JOIN discount d ON p.DISCOUNT_ID = d.DISCOUNT_ID " +
+                "WHERE r.ROOM_ID IN (SELECT ROOM_ID FROM rooms WHERE HOTEL_ID = ?) " +
+                "AND p.PAYMENT_DATE BETWEEN ? AND ? " +
+                "ORDER BY p.PAYMENT_DATE";
+
+        // Print the table header
+        System.out.println("+------------+-----------------------------+------------+------------+---------------------+");
+        System.out.printf("| %-10s | %-27s | %-10s | %-10s | %-19s |\n",
+                "Payment ID", "Guest Name", "Date", "Amount", "Discount");
+        System.out.println("+------------+-----------------------------+------------+------------+---------------------+");
+
+        // Establish database connection
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement stmt = con.prepareStatement(sql)) {
+
+            // Set query parameters
+            stmt.setInt(1, hotelId);
+            stmt.setString(2, startDate);
+            stmt.setString(3, endDate);
+
+            // Execute the query and process the results
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                int paymentId = rs.getInt("PAYMENT_ID");
+                String guestName = rs.getString("GUEST_NAME");
+                String paymentDate = rs.getString("PAYMENT_DATE");
+                double amount = rs.getDouble("AMOUNT");
+                String discountName = rs.getString("DISCOUNT_NAME");
+
+                // Print each row
+                System.out.printf("| %-10d | %-27s | %-10s | %-10.2f | %-19s |\n",
+                        paymentId, guestName, paymentDate, amount, discountName);
+                System.out.println("+------------+-----------------------------+------------+------------+---------------------+");
+            }
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error while generating the payments report: ", e);
+        }
     }
 
     // Ask the user to choose daily, monthly, or yearly report

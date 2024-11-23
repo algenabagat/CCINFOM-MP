@@ -23,7 +23,7 @@ public class DatabaseConnection {
         Scanner input = new Scanner(System.in);
         boolean loggedIn = false;
 
-        while (!loggedIn) {
+        while (!loggedIn)       {
             System.out.println("--- DATABASE LOGIN ---");
             System.out.print("Enter your username: ");
             String user = input.nextLine();
