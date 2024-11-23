@@ -47,13 +47,10 @@ public class HotelManagement {
                         System.out.println("Hotel created successfully with ID: " + hotelId);
                         
                         // Query the maximum ROOM_ID from the rooms table
-                        int maxRoomId = 0;
                         String maxRoomIdQuery = "SELECT COALESCE(MAX(ROOM_ID), 0) AS max_room_id FROM rooms";
                         try (Statement stmt = con.createStatement();
                              ResultSet rs = stmt.executeQuery(maxRoomIdQuery)) {
-                            if (rs.next()) {
-                                maxRoomId = rs.getInt("max_room_id");
-                            }
+                            rs.next();
                         }
 
                         // Query valid TYPE_ID values from the roomtype table
