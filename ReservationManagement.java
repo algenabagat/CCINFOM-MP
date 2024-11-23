@@ -43,8 +43,6 @@ public class ReservationManagement {
                 return; // Abort if the guest ID is invalid
             }
 
-            scanner.nextLine(); // Consume newline
-
             System.out.print("Enter Check-in Date (YYYY-MM-DD): ");
             String checkinDate = scanner.nextLine();
 
