@@ -34,14 +34,14 @@ public class DatabaseConnection {
             setCredentials(user, pass);
 
             // Try connecting with the provided credentials
-            try (Connection conn = getConnection()) {
+            try (Connection ignored = getConnection()) {
                 loggedIn = true; // Connection successful, set loggedIn to true
                 System.out.println("Login successful!\n");
             } catch (SQLException e) {
                 System.out.println("Login failed. Please check your credentials and try again.\n");
             }
         }
-        return loggedIn;
+        return true;
     }
 
     // Method to establish and return the database connection
