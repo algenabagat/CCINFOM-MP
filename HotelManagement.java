@@ -1,4 +1,6 @@
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,6 +45,55 @@ public class HotelManagement {
                     if (generatedKeys.next()) {
                         int hotelId = generatedKeys.getInt(1);
                         System.out.println("Hotel created successfully with ID: " + hotelId);
+                        
+                        // Query the maximum ROOM_ID from the rooms table
+                        int maxRoomId = 0;
+                        String maxRoomIdQuery = "SELECT COALESCE(MAX(ROOM_ID), 0) AS max_room_id FROM rooms";
+                        try (Statement stmt = con.createStatement();
+                             ResultSet rs = stmt.executeQuery(maxRoomIdQuery)) {
+                            if (rs.next()) {
+                                maxRoomId = rs.getInt("max_room_id");
+                            }
+                        }
+
+                        // Query valid TYPE_ID values from the roomtype table
+                        List<Integer> validTypeIds = new ArrayList<>();
+                        String typeIdQuery = "SELECT ROOMTYPE_ID FROM roomtype";
+                        try (Statement stmt = con.createStatement();
+                             ResultSet rs = stmt.executeQuery(typeIdQuery)) {
+                            while (rs.next()) {
+                                validTypeIds.add(rs.getInt("ROOMTYPE_ID"));
+                            }
+                        }
+
+                        // Automatically create rooms for the new hotel
+                        PreparedStatement roomsPstmt = null;
+                        try {
+                            // Prepare the SQL INSERT statement
+                            String insertSQL = "INSERT INTO rooms (ROOM_NO, TYPE_ID, HOTEL_ID) VALUES (?, ?, ?)";
+                            roomsPstmt = con.prepareStatement(insertSQL);
+
+                            // Automatically produce 50 rooms for the hotel
+                            for (int room_number = 1; room_number <= 50; room_number++) {
+                                int room_no = hotelId * 100 + room_number; // Ensure unique ROOM_NO
+                                roomsPstmt.setInt(1, room_no);
+
+                                // Assign a valid TYPE_ID
+                                int type_id = validTypeIds.get(room_number % validTypeIds.size());
+                                roomsPstmt.setInt(2, type_id);
+
+                                roomsPstmt.setInt(3, hotelId);
+                                roomsPstmt.executeUpdate();
+                            }
+                            System.out.println("Rooms created successfully for hotel ID: " + hotelId);
+                        } catch (SQLException e) {
+                            logger.log(Level.SEVERE, "SQL Exception occurred while creating rooms", e);
+                        } finally {
+                            // Close the resources
+                            if (roomsPstmt != null) {
+                                roomsPstmt.close();
+                            }
+                        }
                     }
                 }
             } else {
@@ -193,58 +244,6 @@ public class HotelManagement {
 
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "SQL Exception occurred while deleting hotel", e);
-        }
-    }
-
-    public static void createRoom() {
-        Scanner scanner = new Scanner(System.in);
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-
-        try {
-            // Prompt the user for input
-            System.out.print("Enter Room Number: ");
-            int roomNumber = scanner.nextInt();
-            scanner.nextLine();  // Consume the newline left by nextInt()
-
-            System.out.print("Enter Room Type: ");
-            String roomType = scanner.nextLine();
-
-            System.out.print("Enter Room Rate: ");
-            double roomRate = scanner.nextDouble();
-            scanner.nextLine();  // Consume the newline left by nextDouble()
-
-            // Establish a connection to the database
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/hotel_db", "username", "password");
-
-            // Prepare the SQL INSERT statement
-            String insertSQL = "INSERT INTO room (ROOM_NUMBER, ROOM_TYPE, ROOM_RATE) VALUES (?, ?, ?)";
-            preparedStatement = connection.prepareStatement(insertSQL);
-            preparedStatement.setInt(1, roomNumber);
-            preparedStatement.setString(2, roomType);
-            preparedStatement.setDouble(3, roomRate);
-
-            // Execute the insert
-            int rowsAffected = preparedStatement.executeUpdate();
-            if (rowsAffected > 0) {
-                System.out.println("Room created successfully.");
-            } else {
-                System.out.println("Room creation failed.");
-            }
-        } catch (SQLException e) {
-            logger.log(Level.SEVERE, "SQL Exception occurred while creating room", e);
-        } finally {
-            // Close the resources
-            try {
-                if (preparedStatement != null) {
-                    preparedStatement.close();
-                }
-                if (connection != null) {
-                    connection.close();
-                }
-            } catch (SQLException e) {
-                logger.log(Level.SEVERE, "SQL Exception occurred while closing resources", e);
-            }
         }
     }
 

@@ -14,8 +14,7 @@ public class HotelManagementView {
          System.out.println("1. View Hotel Details");
          System.out.println("2. Update Hotel Details");
          System.out.println("3. Create a New Hotel");
-         System.out.println("4. Create a New Room");
-         System.out.println("5. Delete a Hotel");
+         System.out.println("4. Delete a Hotel");
          System.out.println("0. Return to Main Menu");
          System.out.print("Choose an option: ");
          int var1 = this.scanner.nextInt();
@@ -37,9 +36,6 @@ public class HotelManagementView {
                HotelManagement.createHotel();
                break;
             case 4:
-               this.createRoom();
-               break;
-            case 5:
                this.deleteHotel();
                HotelManagement.viewHotelDetails();
                HotelManagement.deleteHotel();
@@ -56,10 +52,6 @@ public class HotelManagementView {
 
    private void updateHotelDetails() {
       System.out.println("Updating hotel details...");
-   }
-
-   private void createRoom() {
-      System.out.println("Creating a new room...");
    }
 
    private void createHotel() { System.out.println("Creating a new hotel..."); }
