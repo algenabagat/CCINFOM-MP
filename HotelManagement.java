@@ -111,7 +111,8 @@ public class HotelManagement {
                 "c.COUNTRY_NAME, h.HOTEL_EMAIL, h.CONTACT_NO " +
                 "FROM hotel h " +
                 "JOIN location l ON h.LOCATION_ID = l.LOCATION_ID " +
-                "JOIN country c ON l.COUNTRY_ID = c.COUNTRY_ID";
+                "JOIN country c ON l.COUNTRY_ID = c.COUNTRY_ID " +
+                "ORDER BY h.HOTEL_ID";
 
         try (Connection con = DatabaseConnection.getConnection();
              Statement stmt = con.createStatement();
