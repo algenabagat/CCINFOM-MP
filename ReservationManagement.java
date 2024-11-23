@@ -73,7 +73,7 @@ public class ReservationManagement {
                 insertStmt.setInt(2, selectedRoomId);
                 insertStmt.setDate(3, Date.valueOf(checkinDate));
                 insertStmt.setDate(4, Date.valueOf(checkoutDate));
-                insertStmt.setString(5, "Confirmed");
+                insertStmt.setString(5, "Not Paid");
 
                 int rowsAffected = insertStmt.executeUpdate();
                 if (rowsAffected > 0) {
