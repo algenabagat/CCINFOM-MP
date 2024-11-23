@@ -1,7 +1,6 @@
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Scanner;
 
 public class DatabaseConnection {
 
@@ -12,43 +11,25 @@ public class DatabaseConnection {
     // Private constructor to prevent instantiation
     private DatabaseConnection() {}
 
-    // Method to prompt the user for their credentials and set them
+    // Method to set the credentials
     private static void setCredentials(String user, String pass) {
         username = user;
         password = pass;
     }
 
     // Method to handle the login process
-    public static boolean login() {
-        Scanner input = new Scanner(System.in);
-        boolean loggedIn = false;
-
-        while (!loggedIn)       {
-            System.out.println("--- DATABASE LOGIN ---");
-            System.out.print("Enter your username: ");
-            String user = input.nextLine();
-            System.out.print("Enter your password: ");
-            String pass = input.nextLine();
-
-            // Set the credentials
-            setCredentials(user, pass);
-
-            // Try connecting with the provided credentials
-            try (Connection ignored = getConnection()) {
-                loggedIn = true; // Connection successful, set loggedIn to true
-                System.out.println("Login successful!\n");
-            } catch (SQLException e) {
-                System.out.println("Login failed. Please check your credentials and try again.\n");
-            }
+    public static boolean login(String user, String pass) {
+        setCredentials(user, pass);
+        try (Connection connection = DriverManager.getConnection(URL, username, password)) {
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
-        return true;
     }
 
-    // Method to establish and return the database connection
+    // Method to get a connection
     public static Connection getConnection() throws SQLException {
-        if (username == null || password == null) {
-            throw new SQLException("User credentials are not set.");
-        }
         return DriverManager.getConnection(URL, username, password);
     }
 }
