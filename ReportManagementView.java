@@ -35,6 +35,7 @@ public class ReportManagementView {
                     break;
                 case 4:
                     generatePaymentsReport();
+                    ReportsManagement.generatePaymentsReport();
                     break;
                 case 0:
                     return;  // Return to main menu
