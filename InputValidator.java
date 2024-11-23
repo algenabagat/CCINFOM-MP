@@ -152,30 +152,31 @@ public class InputValidator {
     }
 
     // Validates that the room is not already booked for the selected dates
-    public static boolean checkReservationOverlap(int roomId, String checkinDate, String checkoutDate) {
+    public static boolean checkReservationOverlap(Connection con, int roomId, String checkinDate, String checkoutDate, int reservationId) {
         String checkOverlapQuery = "SELECT COUNT(*) AS overlap_count FROM reservation " +
-                "WHERE ROOM_ID = ? AND " +
-                "((CHECKIN_DATE <= ? AND CHECKOUT_DATE > ?) OR " +
-                "(CHECKIN_DATE < ? AND CHECKOUT_DATE >= ?))";
+                "WHERE ROOM_ID = ? AND RESERVATION_ID != ? AND " + // Exclude the current reservation
+                "((CHECKIN_DATE < ? AND CHECKOUT_DATE > ?) OR " + // Overlap starts before checkout
+                "(CHECKIN_DATE < ? AND CHECKOUT_DATE > ?))";       // Overlap starts during the stay
 
-        try (Connection con = DatabaseConnection.getConnection();
-             PreparedStatement checkStmt = con.prepareStatement(checkOverlapQuery)) {
+        try (PreparedStatement checkStmt = con.prepareStatement(checkOverlapQuery)) {
             checkStmt.setInt(1, roomId);
-            checkStmt.setDate(2, Date.valueOf(checkinDate));
-            checkStmt.setDate(3, Date.valueOf(checkinDate));
-            checkStmt.setDate(4, Date.valueOf(checkoutDate));
+            checkStmt.setInt(2, reservationId);
+            checkStmt.setDate(3, Date.valueOf(checkoutDate));
+            checkStmt.setDate(4, Date.valueOf(checkinDate));
             checkStmt.setDate(5, Date.valueOf(checkoutDate));
+            checkStmt.setDate(6, Date.valueOf(checkinDate));
 
             ResultSet overlapRs = checkStmt.executeQuery();
-            overlapRs.next();
-            int overlapCount = overlapRs.getInt("overlap_count");
-
-            return overlapCount == 0; // True if no overlap
+            if (overlapRs.next()) {
+                int overlapCount = overlapRs.getInt("overlap_count");
+                return overlapCount > 0; // True if there are overlaps
+            }
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "SQL Exception occurred while checking reservation overlap", e);
-            return false;
         }
+        return false; // Assume no overlap if an error occurs
     }
+
 
     public static boolean validateRoom(Connection con, int selectedRoomId, int selectedHotelId) {
         String validateRoomQuery = "SELECT COUNT(*) AS room_count FROM rooms WHERE ROOM_ID = ? AND HOTEL_ID = ?";

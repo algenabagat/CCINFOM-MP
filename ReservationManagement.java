@@ -60,7 +60,7 @@ public class ReservationManagement {
             }
 
             // Step 6: Check for overlapping reservations
-            if (!InputValidator.checkReservationOverlap(selectedRoomId, checkinDate, checkoutDate)) {
+            if (!InputValidator.checkReservationOverlap(con, selectedRoomId, checkinDate, checkoutDate, -1)) {
                 System.out.println("Cannot add reservation! The selected room is already booked for the selected dates.");
                 return; // Abort reservation if there is an overlap
             }
@@ -157,6 +157,7 @@ public class ReservationManagement {
             }
 
             // Ask for Room ID before the dates
+            displayRooms(con, hotelId);
             int roomId = InputValidator.getValidIntInput("Enter Room ID: ");
 
             // Validate the Room ID for the given Hotel ID
@@ -183,11 +184,12 @@ public class ReservationManagement {
             }
 
             // Call checkReservationOverlap to check for overlapping reservations
-            boolean isOverlapping = InputValidator.checkReservationOverlap(roomId, newCheckinDate, newCheckoutDate);
+            boolean isOverlapping = InputValidator.checkReservationOverlap(con, roomId, newCheckinDate, newCheckoutDate, reservationId);
             if (isOverlapping) {
                 System.out.println("Cannot update reservation! The selected room already has a reservation on the selected dates.");
                 return; // Abort if there is an overlap
             }
+
 
             // SQL query to update the reservation (without the reservation status)
             String updateQuery = "UPDATE reservation " +
@@ -272,17 +274,23 @@ public class ReservationManagement {
     }
 
     // Helper method to get Hotel ID from Reservation ID
-    private static int getHotelIdFromReservation(Connection con, int reservationId) throws SQLException {
-        String getHotelQuery = "SELECT HOTEL_ID FROM reservation WHERE RESERVATION_ID = ?";
-        try (PreparedStatement stmt = con.prepareStatement(getHotelQuery)) {
+    private static int getHotelIdFromReservation(Connection con, int reservationId) {
+        String query = "SELECT r.HOTEL_ID " +
+                "FROM rooms r " +
+                "INNER JOIN reservation res ON r.ROOM_ID = res.ROOM_ID " +
+                "WHERE res.RESERVATION_ID = ?";
+        try (PreparedStatement stmt = con.prepareStatement(query)) {
             stmt.setInt(1, reservationId);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return rs.getInt("HOTEL_ID");
-            } else {
-                return -1; // If no hotel found for the reservation
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("HOTEL_ID"); // Return the HOTEL_ID
+                }
             }
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "SQL Exception occurred while fetching HOTEL_ID", e);
         }
+        return -1; // Return -1 if HOTEL_ID is not found
     }
 
     // Function to show all guests
