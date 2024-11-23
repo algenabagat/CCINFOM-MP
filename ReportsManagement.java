@@ -154,7 +154,7 @@ public class ReportsManagement {
         // Print the table border
         System.out.println("+----------------+-----------------------------+------------+------------+------------------+----------+");
         System.out.printf("| %-14s | %-27s | %-10s | %-10s | %-16s | %-8s |\n",
-                "Reservation ID", "Guest Name", "Check-in", "Check-out", "Reservation Status", "Room No");
+                "Reservation ID", "Guest Name", "Check-in", "Check-out", "Status", "Room No");
         System.out.println("+----------------+-----------------------------+------------+------------+------------------+----------+");
 
         // Establish database connection
@@ -179,14 +179,12 @@ public class ReportsManagement {
                 // Print each row of data in the table
                 System.out.printf("| %-14d | %-27s | %-10s | %-10s | %-16s | %-8d |\n",
                         reservationId, guestName, checkinDate, checkoutDate, reservationStatus, roomNo);
+                System.out.println("+----------------+-----------------------------+------------+------------+------------------+----------+");
             }
 
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Error while generating the report: ", e);
         }
-
-        // Print the table border at the end
-        System.out.println("+----------------+-----------------------------+------------+------------+------------------+----------+");
     }
 
     // Method to generate payments report

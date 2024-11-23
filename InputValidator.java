@@ -233,4 +233,27 @@ public class InputValidator {
         System.out.print(prompt);
         return scanner.nextLine();
     }
+
+    public static boolean validateGuestId(int guestId) {
+        String query = "SELECT COUNT(*) FROM guest WHERE GUEST_ID = ?";
+
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement stmt = con.prepareStatement(query)) {
+
+            // Set the guest ID parameter
+            stmt.setInt(1, guestId);
+
+            // Execute the query
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next() && rs.getInt(1) > 0) {
+                    return true; // Guest ID exists
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error while validating Guest ID: " + e.getMessage());
+        }
+
+        return false; // Guest ID does not exist
+    }
+
 }

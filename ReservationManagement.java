@@ -34,7 +34,15 @@ public class ReservationManagement {
             }
 
             // Step 5: Collect reservation details
+            showGuests();
             int guestId = InputValidator.getValidIntInput("Enter Guest ID: ");
+
+            // Validate guest
+            if (!InputValidator.validateGuestId(guestId)) {
+                System.out.println("Reservation aborted due to invalid Guest ID.");
+                return; // Abort if the guest ID is invalid
+            }
+
             scanner.nextLine(); // Consume newline
 
             System.out.print("Enter Check-in Date (YYYY-MM-DD): ");
@@ -215,11 +223,8 @@ public class ReservationManagement {
     }
 
     public static void cancelReservation() {
-        Scanner scanner = new Scanner(System.in);
-
         // Ask for Reservation ID
         int reservationId = InputValidator.getValidIntInput("Enter Reservation ID to cancel: ");
-        scanner.nextLine(); // Consume newline
 
         String query = "DELETE FROM reservation WHERE RESERVATION_ID = ?";
 
@@ -279,6 +284,40 @@ public class ReservationManagement {
             } else {
                 return -1; // If no hotel found for the reservation
             }
+        }
+    }
+
+    // Function to show all guests
+    public static void showGuests() {
+        System.out.println("Fetching guest details...");
+
+        // SQL query to fetch guest details
+        String sql = "SELECT GUEST_ID, GUEST_NAME, CONTACT_NO, EMAIL FROM guest";
+
+        // Print the table header
+        System.out.println("+----------+-----------------------------+-----------------+----------------------------------------------------+");
+        System.out.printf("| %-8s | %-27s | %-15s | %-50s |\n", "Guest ID", "Guest Name", "Contact No", "Email");
+        System.out.println("+----------+-----------------------------+-----------------+----------------------------------------------------+");
+
+        // Establish database connection and execute query
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement stmt = con.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            // Iterate through the result set and display each guest
+            while (rs.next()) {
+                int guestId = rs.getInt("GUEST_ID");
+                String guestName = rs.getString("GUEST_NAME");
+                String contactNo = rs.getString("CONTACT_NO");
+                String email = rs.getString("EMAIL");
+
+                // Print each guest's information
+                System.out.printf("| %-8d | %-27s | %-15s | %-50s |\n", guestId, guestName, contactNo, email);
+                System.out.println("+----------+-----------------------------+-----------------+----------------------------------------------------+");
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error while fetching guest details: " + e.getMessage());
         }
     }
 }
